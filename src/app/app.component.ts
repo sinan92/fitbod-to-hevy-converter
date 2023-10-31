@@ -95,11 +95,18 @@ export class AppComponent {
                 case "Machine Bench Press":
                     entry.Exercise = "Chest Press (Machine)";
                     break;
+                case "Dumbbell Pullover":
+                    entry.Exercise = "Pullover (Dumbbell)";
+                    break;
                 case "Dumbbell Decline Bench Press":
                     entry.Exercise = "Decline Bench Press (Dumbbell)";
                     break;
                 case "Barbell Decline Bench Press":
                     entry.Exercise = "Decline Bench Press (Barbell)";
+                    break;
+                case "Standing Arnold Press":
+                case "Arnold Dumbbell Press":
+                    entry.Exercise = "Arnold Press (Dumbbell)";
                     break;
                 case "Standing Dumbbell Shoulder Press":
                 case "Dumbbell Shoulder Press":
@@ -132,6 +139,9 @@ export class AppComponent {
                 case "Machine Fly":
                     entry.Exercise = "Chest Fly (Machine)";
                     break;
+                case "Mid Cable Crossover Fly":
+                    entry.Exercise = "Cable Fly Crossovers";
+                    break;
                 case "Machine Rear Delt Fly":
                 case "Machine Reverse Fly":
                     entry.Exercise = "Rear Delt Reverse Fly (Machine)";
@@ -160,8 +170,29 @@ export class AppComponent {
                 case "Leg Curl":
                     entry.Exercise = "Lying Leg Curl (Machine)";
                     break;
+                case "Machine Hip Abductor":
+                case "Machine Tigh Abductor":
+                    entry.Exercise = "Hip Abduction (Machine)";
+                    break;
+                case "Machine Hip Adductor":
+                    entry.Exercise = "Hip Adduction (Machine)";
+                    break;
+                case "Calf Press":
+                case "Seated Machine Calf Press":
+                case "Standing Calf Press":
+                    entry.Exercise = "Calf Press (Machine)";
+                    break;
                 case "Machine Leg Press":
                     entry.Exercise = "Leg Press (Machine)";
+                    break;
+                case "Dumbbell Lunge":
+                    entry.Exercise = "Lunge (Dumbbell)";
+                    break;
+                case "Barbell Lunge":
+                    entry.Exercise = "Lunge (Barbell)";
+                    break;
+                case "Side Lunge":
+                    entry.Exercise = "Lateral Lunge";
                     break;
                 case "EZ-Bar Curl":
                 case "Close-Grip EZ-Bar Curl":
@@ -173,6 +204,53 @@ export class AppComponent {
                     break;
                 case "Triceps Pressdown":
                     entry.Exercise = "Triceps Pushdown";
+                    break;
+                case "Bent Over Barbell Row":
+                    entry.Exercise = "Bent Over Row (Barbell)";
+                    break;
+                case "Cable Row":
+                    entry.Exercise = "Seated Cable Row - Bar Grip";
+                    break;
+                case "Cable Row with Squat":
+                    entry.Exercise = "Squat Row";
+                    break;
+                case "Cable Upright Row":
+                    entry.Exercise = "Upright Row (Cable)";
+                    break;
+                case "T-Bar Row":
+                    entry.Exercise = "T Bar Row";
+                    break;
+                case "Machine Row":
+                    entry.Exercise = "Seated Row (Machine)";
+                    break;
+                case "Straight-Arm Pulldown":
+                    entry.Exercise = "Rope Straight Arm Pulldown";
+                    break;
+                case "Hammerstrength Iso Row":
+                    entry.Exercise = "Iso-Lateral Row (Machine)";
+                    break;
+                case "Dumbbell Shrug":
+                    entry.Exercise = "Shrug (Dumbbell)";
+                    break;
+                case "Barbell Shrug":
+                    entry.Exercise = "Shrug (Barbell)";
+                    break;
+                case "Cable Shrug":
+                    entry.Exercise = "Shrug (Cable)";
+                    break;
+                case "Lateral Raise":
+                case "Side Lateral Raise":
+                    entry.Exercise = "Lateral Raise (Dumbbell)";
+                    break;
+                case "Cable Lateral Raise":
+                    entry.Exercise = "Lateral Raise (Cable)";
+                    break;
+                case "Machine Lateral Raise":
+                    entry.Exercise = "Lateral Raise (Machine)";
+                    break;
+                case "Smith Machine Shrug":
+                case "Smith Machine Behind the Back Shrug Shrug":
+                    entry.Exercise = "Shrug (Smith Machine)";
                     break;
                 case "Deadlift":
                     entry.Exercise = "Deadlift (Barbell)";
@@ -212,6 +290,9 @@ export class AppComponent {
                     break;
                 case "Machine Preacher Curl":
                     entry.Exercise = "Preacher Curl (Machine)";
+                    break;
+                case "Crunches":
+                    entry.Exercise = "Crunch";
                     break;
             }
 
