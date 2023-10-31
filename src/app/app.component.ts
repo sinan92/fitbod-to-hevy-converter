@@ -31,8 +31,8 @@ export class AppComponent {
                         let text: any = reader.result;
                         let fitbodData: Fitbod[] = this.csvJSON(text);
 
-                        console.log(fitbodData);
                         const hevyData = this.fitBodToHevy(fitbodData);
+                        console.log(hevyData);
                         const file = new File([this.JSONtoCSV(hevyData)], 'FitBodToHevyConvertedFile.csv', { type: "csv/text" });
 
                         saveAs(file);
@@ -61,28 +61,39 @@ export class AppComponent {
 
     fitBodToHevy(fitBodData: Fitbod[]): Hevy[] {
         let hevyData: Hevy[] = [];
-        console.log(fitBodData[0].multiplier);
+        const setOrdersMap = new Map<string, number>(); // Map to track set orders for unique exercise and date combinations
+    
         fitBodData.forEach((entry) => {
+            const exerciseKey = `${entry.Date.substring(0, 10)}_${entry.Exercise}`; // Unique key for each exercise and date
+    
+            if (!setOrdersMap.has(exerciseKey)) {
+                setOrdersMap.set(exerciseKey, 1); // Initialize the set order for a new exercise on a specific date
+            }
+    
+            const setOrder = setOrdersMap.get(exerciseKey)!; // Get the set order for this exercise and date
+            setOrdersMap.set(exerciseKey, setOrder + 1); // Increment set order for the next entry
+    
             hevyData.push({
                 Date: entry.Date.substring(0, 19),
                 "Workout Name": "Workout on: " + moment(entry.Date).format('YYYY-MM-DD'),
                 "Exercise Name": entry.Exercise,
-                "Set Order": 0,
-                Weight: (parseFloat(entry['Weight(kg)']) * (parseInt(entry.multiplier))),
+                "Set Order": setOrder,
+                Weight: (parseFloat(entry['Weight(kg)']) * parseInt(entry.multiplier)),
                 "Weight Unit": "kg",
                 Reps: parseInt(entry.Reps),
                 RPE: null,
                 Distance: null,
                 "Distance Unit": null,
-                Seconds: null,
+                Seconds: 0,
                 Notes: null,
                 "Workout Notes": null,
-                "Workout Duration": parseInt(entry['Duration(s)']) + "s",
-            })
-        })
-
+                "Workout Duration": "30m",
+            });
+        });
+    
         return hevyData;
     }
+    
 
     JSONtoCSV(json: any[]): string {
         const items = json

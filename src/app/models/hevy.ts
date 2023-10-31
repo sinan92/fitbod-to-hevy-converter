@@ -9,7 +9,7 @@ export class Hevy {
     RPE: string = "";
     Distance: string = "";
     "Distance Unit" = "";
-    Seconds: string = "";
+    Seconds: number = 0;
     Notes: string = "";
     "Workout Notes": string = "";
     "Workout Duration": string = "";
