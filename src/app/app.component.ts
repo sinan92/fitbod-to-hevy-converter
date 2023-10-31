@@ -63,6 +63,86 @@ export class AppComponent {
         let hevyData: Hevy[] = [];
         const setOrdersMap = new Map<string, number>(); // Map to track set orders for unique exercise and date combinations
 
+        const exerciseMappings = {
+            "Barbell Incline Bench Press": "Incline Bench Press (Barbell)",
+            "Dumbbell Incline Bench Press": "Incline Bench Press (Dumbbell)",
+            "Smith Machine Incline Bench Press": "Incline Bench Press (Smith Machine)",
+            "Smith Machine Bench Press": "Bench Press (Smith Machine)",
+            "Dumbbell Bench Press": "Bench Press (Dumbbell)",
+            "Barbell Bench Press": "Bench Press (Barbell)",
+            "Machine Bench Press": "Chest Press (Machine)",
+            "Dumbbell Pullover": "Pullover (Dumbbell)",
+            "Dumbbell Decline Bench Press": "Decline Bench Press (Dumbbell)",
+            "Barbell Decline Bench Press": "Decline Bench Press (Barbell)",
+            "Standing Arnold Press": "Arnold Press (Dumbbell)",
+            "Arnold Dumbbell Press": "Arnold Press (Dumbbell)",
+            "Standing Dumbbell Shoulder Press": "Overhead Press (Dumbbell)",
+            "Dumbbell Shoulder Press": "Overhead Press (Dumbbell)",
+            "Seated Barbell Shoulder Press": "Seated Overhead Press (Barbell)",
+            "Machine Shoulder Press": "Seated Shoulder Press (Machine)",
+            "Barbell Shoulder Press": "Overhead Press (Barbell)",
+            "Smith Machine Overhead Shoulder Press": "Overhead Press (Smith Machine)",
+            "Dumbbell Skullcrusher": "Skullcrusher (Dumbbell)",
+            "EZ-Bar Skullcrusher": "Skullcrusher (Barbell)",
+            "Skullcrusher": "Skullcrusher (Dumbbell)",
+            "Lat Pulldown": "Lat Pulldown (Cable)",
+            "Machine Fly": "Chest Fly (Machine)",
+            "Mid Cable Crossover Fly": "Cable Fly Crossovers",
+            "Machine Rear Delt Fly": "Rear Delt Reverse Fly (Machine)",
+            "Machine Leg Press": "Leg Press (Machine)",
+            "Back Squat": "Squat (Barbell)",
+            "Pause Back Squat": "Pause Squat (Barbell)",
+            "Dumbbell Sumo Squat": "Sumo Squat (Dumbbell)",
+            "Kettlebell Sumo Squat": "Sumo Squat (Kettlebell)",
+            "Leg Extension": "Leg Extension (Machine)",
+            "Seated Leg Curl": "Seated Leg Curl (Machine)",
+            "Leg Curl": "Lying Leg Curl (Machine)",
+            "Machine Hip Abductor": "Hip Abduction (Machine)",
+            "Machine Tigh Abductor": "Hip Abduction (Machine)",
+            "Machine Hip Adductor": "Hip Adduction (Machine)",
+            "Calf Press": "Calf Press (Machine)",
+            "Seated Machine Calf Press": "Calf Press (Machine)",
+            "Standing Calf Press": "Calf Press (Machine)",
+            "Dumbbell Lunge": "Lunge (Dumbbell)",
+            "Barbell Lunge": "Lunge (Barbell)",
+            "Side Lunge": "Lateral Lunge",
+            "EZ-Bar Curl": "EZ Bar Biceps Curl",
+            "Close-Grip EZ-Bar Curl": "EZ Bar Biceps Curl",
+            "Cable Rope Tricep Extension": "Triceps Rope Pushdown",
+            "Cable Tricep Extension": "Triceps Rope Pushdown",
+            "Triceps Pressdown": "Triceps Pushdown",
+            "Bent Over Barbell Row": "Bent Over Row (Barbell)",
+            "Cable Row": "Seated Cable Row - Bar Grip",
+            "Cable Row with Squat": "Squat Row",
+            "Cable Upright Row": "Upright Row (Cable)",
+            "T-Bar Row": "T Bar Row",
+            "Machine Row": "Seated Row (Machine)",
+            "Straight-Arm Pulldown": "Rope Straight Arm Pulldown",
+            "Hammerstrength Iso Row": "Iso-Lateral Row (Machine)",
+            "Dumbbell Shrug": "Shrug (Dumbbell)",
+            "Barbell Shrug": "Shrug (Barbell)",
+            "Cable Shrug": "Shrug (Cable)",
+            "Lateral Raise": "Lateral Raise (Dumbbell)",
+            "Side Lateral Raise": "Lateral Raise (Dumbbell)",
+            "Cable Lateral Raise": "Lateral Raise (Cable)",
+            "Machine Lateral Raise": "Lateral Raise (Machine)",
+            "Smith Machine Shrug": "Shrug (Smith Machine)",
+            "Smith Machine Behind the Back Shrug Shrug": "Shrug (Smith Machine)",
+            "Deadlift": "Deadlift (Barbell)",
+            "Romanian Deadlift": "Romanian Deadlift (Barbell)",
+            "Dumbbell Romanian Deadlift": "Romanian Deadlift (Dumbbell)",
+            "Low Cable Chest Fly": "Low Cable Fly Crossovers",
+            "Cable Crossover Fly": "Cable Fly Crossovers",
+            "Dumbbell Incline Fly": "Incline Chest Fly (Dumbbell)",
+            "Dumbbell Bicep Curl": "Bicep Curl (Dumbbell)",
+            "Cable Bicep Curl": "Bicep Curl (Cable)",
+            "Barbell Curl": "Bicep Curl (Barbell)",
+            "Dumbbell Preacher Curl": "Preacher Curl (Dumbbell)",
+            "Preacher Curl": "Preacher Curl (Barbell)",
+            "Machine Preacher Curl": "Preacher Curl (Machine)",
+            "Crunches": "Crunch"
+        };
+
         fitBodData.forEach((entry) => {
             const exerciseKey = `${entry.Date.substring(0, 10)}_${entry.Exercise}`; // Unique key for each exercise and date
 
@@ -73,227 +153,9 @@ export class AppComponent {
             const setOrder = setOrdersMap.get(exerciseKey)!; // Get the set order for this exercise and date
             setOrdersMap.set(exerciseKey, setOrder + 1); // Increment set order for the next entry
 
-            switch (entry.Exercise) {
-                case "Barbell Incline Bench Press":
-                    entry.Exercise = "Incline Bench Press (Barbell)";
-                    break;
-                case "Dumbbell Incline Bench Press":
-                    entry.Exercise = "Incline Bench Press (Dumbbell)";
-                    break;
-                case "Smith Machine Incline Bench Press":
-                    entry.Exercise = "Incline Bench Press (Smith Machine)";
-                    break;
-                case "Smith Machine Bench Press":
-                    entry.Exercise = "Bench Press (Smith Machine)";
-                    break;
-                case "Dumbbell Bench Press":
-                    entry.Exercise = "Bench Press (Dumbbell)";
-                    break;
-                case "Barbell Bench Press":
-                    entry.Exercise = "Bench Press (Barbell)";
-                    break;
-                case "Machine Bench Press":
-                    entry.Exercise = "Chest Press (Machine)";
-                    break;
-                case "Dumbbell Pullover":
-                    entry.Exercise = "Pullover (Dumbbell)";
-                    break;
-                case "Dumbbell Decline Bench Press":
-                    entry.Exercise = "Decline Bench Press (Dumbbell)";
-                    break;
-                case "Barbell Decline Bench Press":
-                    entry.Exercise = "Decline Bench Press (Barbell)";
-                    break;
-                case "Standing Arnold Press":
-                case "Arnold Dumbbell Press":
-                    entry.Exercise = "Arnold Press (Dumbbell)";
-                    break;
-                case "Standing Dumbbell Shoulder Press":
-                case "Dumbbell Shoulder Press":
-                    entry.Exercise = "Overhead Press (Dumbbell)";
-                    break;
-                case "Seated Barbell Shoulder Press":
-                    entry.Exercise = "Seated Overhead Press (Barbell)";
-                    break;
-                case "Machine Shoulder Press":
-                    entry.Exercise = "Seated Shoulder Press (Machine)";
-                    break;
-                case "Barbell Shoulder Press":
-                    entry.Exercise = "Overhead Press (Barbell)";
-                    break;
-                case "Smith Machine Overhead Shoulder Press":
-                    entry.Exercise = "Overhead Press (Smith Machine)";
-                    break;
-                case "Dumbbell Skullcrusher":
-                    entry.Exercise = "Skullcrusher (Dumbbell)";
-                    break;
-                case "EZ-Bar Skullcrusher":
-                    entry.Exercise = "Skullcrusher (Barbell)";
-                    break;
-                case "Skullcrusher":
-                    entry.Exercise = "Skullcrusher (Dumbbell)";
-                    break;
-                case "Lat Pulldown":
-                    entry.Exercise = "Lat Pulldown (Cable)";
-                    break;
-                case "Machine Fly":
-                    entry.Exercise = "Chest Fly (Machine)";
-                    break;
-                case "Mid Cable Crossover Fly":
-                    entry.Exercise = "Cable Fly Crossovers";
-                    break;
-                case "Machine Rear Delt Fly":
-                case "Machine Reverse Fly":
-                    entry.Exercise = "Rear Delt Reverse Fly (Machine)";
-                    break;
-                case "Machine Leg Press":
-                    entry.Exercise = "Leg Press (Machine)";
-                    break;
-                case "Back Squat":
-                    entry.Exercise = "Squat (Barbell)";
-                    break;
-                case "Pause Back Squat":
-                    entry.Exercise = "Pause Squat (Barbell)";
-                    break;
-                case "Dumbbell Sumo Squat":
-                    entry.Exercise = "Sumo Squat (Dumbbell)";
-                    break;
-                case "Kettlebell Sumo Squat":
-                    entry.Exercise = "Sumo Squat (Kettlebell)";
-                    break;
-                case "Leg Extension":
-                    entry.Exercise = "Leg Extension (Machine)";
-                    break;
-                case "Seated Leg Curl":
-                    entry.Exercise = "Seated Leg Curl (Machine)";
-                    break;
-                case "Leg Curl":
-                    entry.Exercise = "Lying Leg Curl (Machine)";
-                    break;
-                case "Machine Hip Abductor":
-                case "Machine Tigh Abductor":
-                    entry.Exercise = "Hip Abduction (Machine)";
-                    break;
-                case "Machine Hip Adductor":
-                    entry.Exercise = "Hip Adduction (Machine)";
-                    break;
-                case "Calf Press":
-                case "Seated Machine Calf Press":
-                case "Standing Calf Press":
-                    entry.Exercise = "Calf Press (Machine)";
-                    break;
-                case "Machine Leg Press":
-                    entry.Exercise = "Leg Press (Machine)";
-                    break;
-                case "Dumbbell Lunge":
-                    entry.Exercise = "Lunge (Dumbbell)";
-                    break;
-                case "Barbell Lunge":
-                    entry.Exercise = "Lunge (Barbell)";
-                    break;
-                case "Side Lunge":
-                    entry.Exercise = "Lateral Lunge";
-                    break;
-                case "EZ-Bar Curl":
-                case "Close-Grip EZ-Bar Curl":
-                    entry.Exercise = "EZ Bar Biceps Curl";
-                    break;
-                case "Cable Rope Tricep Extension":
-                case "Cable Tricep Extension":
-                    entry.Exercise = "Triceps Rope Pushdown";
-                    break;
-                case "Triceps Pressdown":
-                    entry.Exercise = "Triceps Pushdown";
-                    break;
-                case "Bent Over Barbell Row":
-                    entry.Exercise = "Bent Over Row (Barbell)";
-                    break;
-                case "Cable Row":
-                    entry.Exercise = "Seated Cable Row - Bar Grip";
-                    break;
-                case "Cable Row with Squat":
-                    entry.Exercise = "Squat Row";
-                    break;
-                case "Cable Upright Row":
-                    entry.Exercise = "Upright Row (Cable)";
-                    break;
-                case "T-Bar Row":
-                    entry.Exercise = "T Bar Row";
-                    break;
-                case "Machine Row":
-                    entry.Exercise = "Seated Row (Machine)";
-                    break;
-                case "Straight-Arm Pulldown":
-                    entry.Exercise = "Rope Straight Arm Pulldown";
-                    break;
-                case "Hammerstrength Iso Row":
-                    entry.Exercise = "Iso-Lateral Row (Machine)";
-                    break;
-                case "Dumbbell Shrug":
-                    entry.Exercise = "Shrug (Dumbbell)";
-                    break;
-                case "Barbell Shrug":
-                    entry.Exercise = "Shrug (Barbell)";
-                    break;
-                case "Cable Shrug":
-                    entry.Exercise = "Shrug (Cable)";
-                    break;
-                case "Lateral Raise":
-                case "Side Lateral Raise":
-                    entry.Exercise = "Lateral Raise (Dumbbell)";
-                    break;
-                case "Cable Lateral Raise":
-                    entry.Exercise = "Lateral Raise (Cable)";
-                    break;
-                case "Machine Lateral Raise":
-                    entry.Exercise = "Lateral Raise (Machine)";
-                    break;
-                case "Smith Machine Shrug":
-                case "Smith Machine Behind the Back Shrug Shrug":
-                    entry.Exercise = "Shrug (Smith Machine)";
-                    break;
-                case "Deadlift":
-                    entry.Exercise = "Deadlift (Barbell)";
-                    break;
-                case "Romanian Deadlift":
-                    entry.Exercise = "Romanian Deadlift (Barbell)";
-                    break;
-                case "Dumbbell Romanian Deadlift":
-                    entry.Exercise = "Romanian Deadlift (Dumbbell)";
-                    break;
-                case "Kettlebell Sumo Squat":
-                    entry.Exercise = "Sumo Squat (Kettlebell)";
-                    break;
-                case "Low Cable Chest Fly":
-                    entry.Exercise = "Low Cable Fly Crossovers";
-                    break;
-                case "Cable Crossover Fly":
-                    entry.Exercise = "Cable Fly Crossovers";
-                    break;
-                case "Dumbbell Incline Fly":
-                    entry.Exercise = "Incline Chest Fly (Dumbbell)";
-                    break;
-                case "Dumbbell Bicep Curl":
-                    entry.Exercise = "Bicep Curl (Dumbbell)";
-                    break;
-                case "Cable Bicep Curl":
-                    entry.Exercise = "Bicep Curl (Cable)";
-                    break;
-                case "Barbell Curl":
-                    entry.Exercise = "Bicep Curl (Barbell)";
-                    break;
-                case "Dumbbell Preacher Curl":
-                    entry.Exercise = "Preacher Curl (Dumbbell)";
-                    break;
-                case "Preacher Curl":
-                    entry.Exercise = "Preacher Curl (Barbell)";
-                    break;
-                case "Machine Preacher Curl":
-                    entry.Exercise = "Preacher Curl (Machine)";
-                    break;
-                case "Crunches":
-                    entry.Exercise = "Crunch";
-                    break;
+
+            if (exerciseMappings[entry.Exercise]) {
+                entry.Exercise = exerciseMappings[entry.Exercise];
             }
 
             hevyData.push({
