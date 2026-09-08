@@ -239,6 +239,15 @@
         font-weight: 800;
     }
 
+    &__format {
+        font-size: 0.72rem;
+        color: var(--muted);
+
+        &::before {
+            content: "· ";
+        }
+    }
+
     &__range {
         margin-left: auto;
         font-size: 0.75rem;
@@ -518,5 +527,114 @@
 
     .footnote {
         font-size: 0.78rem;
+    }
+}
+
+// Manual column mapping: shown in the work area when the header matches no known format.
+.mapping {
+    padding: 1rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    background: var(--surface);
+
+    &__title {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    &__sub {
+        margin: 0 0 0.9rem;
+        font-size: 0.78rem;
+        color: var(--muted);
+        overflow-wrap: anywhere;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 10.5rem 1fr;
+        gap: 0.2rem 0.6rem;
+        align-items: center;
+        padding: 0.45rem 0;
+        border-top: 1px solid var(--border);
+    }
+
+    &__label {
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    &__required {
+        margin-left: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent);
+    }
+
+    &__select {
+        width: 100%;
+        min-height: 2.4rem;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid #2a3040;
+        border-radius: 8px;
+        background: #1a1e28;
+        color: var(--text);
+        font: inherit;
+        font-size: 0.9rem;
+    }
+
+    &__preview {
+        grid-column: 2;
+        min-height: 1.1rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__error {
+        margin: 0.75rem 0 0;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #5a2a22;
+        border-radius: var(--radius-m);
+        background: #1a1411;
+        font-size: 0.85rem;
+        color: #c9cfda;
+    }
+
+    &__actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.9rem;
+
+        .btn {
+            flex: 1;
+        }
+
+        .btn[disabled] {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .mapping__row {
+        grid-template-columns: 1fr;
+    }
+
+    .mapping__preview {
+        grid-column: 1;
+    }
+
+    .mapping__select {
+        min-height: 44px;
+    }
+
+    .mapping__actions {
+        flex-direction: column;
     }
 }

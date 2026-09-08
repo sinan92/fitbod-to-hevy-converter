@@ -138,3 +138,35 @@ Measured on a 375 × 812 viewport after the first build; all applied:
 - **Receipt semantics**: `dt` precedes `dd` in the DOM, reversed visually.
 - `accept=".csv,text/csv,text/plain"` so iOS never greys out the export in the picker.
 - `viewport-fit=cover` plus `env(safe-area-inset-*)` padding for notched phones.
+
+## Addendum 2026-09-08 — input formats and manual column mapping
+
+**Why.** Android has no in-app Fitbod export; Fitbod support mails a database extract instead
+(`bquxjob_….csv`: `date,exercise_name,Reps,weight_kg,duration_seconds,distance_meters,Incline,Resistance,isWarmup`,
+date only, empty cells, lb→kg float noise, shuffled rows). Issue #3 came from exactly this file.
+
+**Converter (done, `src/app/converter/column-mapping.ts`).** An input format is a named `ColumnMapping`
+(field → header name, matched case-insensitively). `INPUT_FORMATS` lists the app export and the support
+export; `detectFormat(header)` picks the first whose required columns are present. A manual mapping is the
+same `ColumnMapping` object supplied by the user: `convertFitbodExport(text, mapping)`. When nothing
+matches, `UnknownFormatError` carries the header and `guessMapping(header)` (keyword-based prefill).
+`ConversionResult.format` names what was recognised for the receipt. Dates without a time are local
+midnight and group by day; weights round to 0.01 kg, distances to 0.1 m.
+
+**UI (to build, `app.*`): phase `mapping`.**
+- Trigger: the converter throws `UnknownFormatError`. Instead of the error card, the work area shows
+  the **column mapping card**: `We don't recognise these columns. Tell us which is which.`
+- One row per field, required first (`Workout date`, `Exercise name`, `Reps`, `Weight in kg`), then
+  optional (`Duration in seconds`, `Distance in meters`, `Warm-up flag`, `Note`). Each row: label, a
+  `<select>` listing the file's columns plus `— not in this file —` for optional fields, and the first
+  data row's value for the selected column as a live preview (`e.g. 2025-06-23`).
+- Prefilled from `error.suggestion`. `Convert with this mapping` is enabled once the four required
+  selects have a value; it calls `convertFitbodExport(text, mapping)` and continues to `done` or shows
+  the converter's error inside the card (`Row 3: "five" in column Repetitions is not a number.`).
+- `Try another file` returns to idle. The receipt header shows the format:
+  `WorkoutExport.csv converted · Fitbod support export`.
+- Rail: step 1 done, step 2 active (`Map the columns`), step 3 pending.
+- Accessibility: the card is a `<form>`; selects have `<label for>`; the preview cell is `aria-live=polite`;
+  the same 44 px targets on phones. Tests: unknown header opens the card prefilled; converting with the
+  mapping shows the receipt; a wrong mapping shows the row error inside the card; both known formats
+  never show the card.

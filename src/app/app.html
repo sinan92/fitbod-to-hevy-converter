@@ -45,6 +45,7 @@
                         <header class="receipt__head">
                             <span class="receipt__check" aria-hidden="true">✓</span>
                             <span class="receipt__file">{{ fileName() }} converted</span>
+                            <span class="receipt__format">{{ r.format }}</span>
                             <span class="receipt__range">{{ dateRange() }}</span>
                         </header>
                         <dl class="receipt__numbers">
@@ -100,6 +101,40 @@
                         }
                     </article>
                 }
+            }
+            @case ('mapping') {
+                <form class="mapping" (submit)="$event.preventDefault(); convertWithMapping()">
+                    <p class="mapping__title">We don't recognise these columns. Tell us which is which.</p>
+                    <p class="mapping__sub">Found in {{ fileName() }}: {{ mappingHeader().join(', ') }}</p>
+                    @for (field of mappingFields; track field) {
+                        <div class="mapping__row">
+                            <label class="mapping__label" [for]="'map-' + field">
+                                {{ fieldLabel(field) }}
+                                @if (isRequired(field)) {
+                                    <span class="mapping__required">required</span>
+                                }
+                            </label>
+                            <select class="mapping__select" [id]="'map-' + field" (change)="setMapping(field, $any($event.target).value)">
+                                <option value="">{{ isRequired(field) ? '— choose a column —' : '— not in this file —' }}</option>
+                                @for (column of mappingHeader(); track column) {
+                                    <option [value]="column" [selected]="mapping()[field] === column">{{ column }}</option>
+                                }
+                            </select>
+                            <span class="mapping__preview" aria-live="polite">
+                                @if (previewFor(field)) {
+                                    e.g. {{ previewFor(field) }}
+                                }
+                            </span>
+                        </div>
+                    }
+                    @if (mappingError()) {
+                        <p class="mapping__error" role="alert">{{ mappingError() }}</p>
+                    }
+                    <div class="mapping__actions">
+                        <button type="submit" class="btn" [disabled]="!mappingReady()">Convert with this mapping</button>
+                        <button type="button" class="btn btn--ghost" (click)="reset()">Try another file</button>
+                    </div>
+                </form>
             }
             @case ('error') {
                 <div class="error" role="alert">
