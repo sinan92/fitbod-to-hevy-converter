@@ -1,0 +1,494 @@
+:host {
+    display: block;
+    min-height: 100%;
+    position: relative;
+    overflow: hidden;
+
+    // Accent glow behind the headline. Pure CSS, sits under everything.
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -30% -20% auto;
+        height: 60%;
+        background: radial-gradient(ellipse at 50% 0%, rgba(255, 90, 54, 0.22), transparent 60%);
+        pointer-events: none;
+    }
+}
+
+.page {
+    position: relative;
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 2.5rem max(1.25rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+}
+
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+
+    &__dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+    }
+}
+
+.headline {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-align: center;
+
+    em {
+        font-style: normal;
+        color: var(--accent);
+        white-space: nowrap;
+    }
+}
+
+.lead {
+    margin: 0 0 1.5rem;
+    text-align: center;
+    color: var(--muted);
+}
+
+// The rail is the progress indicator: done → active → pending, left to right.
+.rail {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin: 0 0 0.9rem;
+    padding: 0;
+    list-style: none;
+
+    &__step {
+        display: grid;
+        min-width: 0;
+        grid-template-columns: auto 1fr;
+        column-gap: 0.4rem;
+        align-items: center;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-m);
+        background: var(--surface);
+        color: var(--muted);
+        font-size: 0.72rem;
+        line-height: 1.3;
+        transition: border-color var(--ease), background var(--ease);
+    }
+
+    &__number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.1rem;
+        height: 1.1rem;
+        border: 1.5px solid #3a4152;
+        border-radius: 50%;
+        font-size: 0.65rem;
+        font-weight: 700;
+        transition: background var(--ease), border-color var(--ease);
+    }
+
+    &__title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #c9cfda;
+    }
+
+    &__hint {
+        grid-column: 2;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__step--active {
+        border-color: var(--accent);
+        background: #1a1411;
+
+        .rail__title {
+            color: var(--text);
+        }
+
+        .rail__number {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: var(--bg);
+        }
+    }
+
+    &__step--done {
+        .rail__title {
+            color: #9ad9b3;
+        }
+
+        .rail__number {
+            border-color: var(--success);
+            background: var(--success);
+            color: var(--bg);
+        }
+    }
+}
+
+// Everything the user acts on happens here, in the same spot, so the page never jumps.
+.work {
+    min-height: 12rem;
+}
+
+.drop {
+    display: block;
+    padding: 1.9rem 1rem;
+    border: 1.5px dashed #3a4152;
+    border-radius: var(--radius-l);
+    background: linear-gradient(180deg, var(--surface), var(--surface-2));
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--ease), box-shadow var(--ease);
+
+    &:focus-within,
+    &:hover {
+        border-color: var(--muted);
+    }
+
+    &--dragging {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(255, 90, 54, 0.18), 0 0 40px rgba(255, 90, 54, 0.25);
+    }
+
+    &--busy {
+        border-style: solid;
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        margin: 0 auto 0.6rem;
+        border-radius: 12px;
+        background: #1a1e28;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    &__title {
+        display: block;
+        font-size: 1rem;
+    }
+
+    &__sub {
+        display: block;
+        margin-top: 0.15rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+
+    .btn {
+        margin-top: 0.9rem;
+    }
+}
+
+@keyframes pulse {
+    50% {
+        border-color: var(--accent);
+    }
+}
+
+.trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+// The result reads like a receipt: header, perforation, the numbers, the fine print, the actions.
+.receipt {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    background: var(--surface);
+    overflow: hidden;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 0.9rem;
+        border-bottom: 1px dashed #2a3040;
+        font-size: 0.85rem;
+    }
+
+    &__check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 50%;
+        background: var(--success);
+        color: var(--bg);
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    &__range {
+        margin-left: auto;
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__numbers {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        margin: 0;
+    }
+
+    &__number {
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 0.9rem 0.75rem;
+        border-right: 1px solid var(--border);
+
+        &:last-child {
+            border-right: 0;
+        }
+
+        dd {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        dt {
+            margin-bottom: 0.2rem;
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        &--warn dd {
+            color: var(--warning);
+        }
+    }
+
+    &__unmapped {
+        padding: 0.7rem 0.9rem 0.9rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.78rem;
+        color: #c9cfda;
+
+        p {
+            margin: 0 0 0.5rem;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.8rem 0.9rem;
+        border-top: 1px solid var(--border);
+
+        .btn {
+            flex: 1;
+        }
+    }
+
+    &__hint {
+        margin: 0;
+        padding: 0 0.9rem 0.8rem;
+        font-size: 0.78rem;
+        color: var(--muted);
+    }
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chip {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid #2a3040;
+    border-radius: 999px;
+    background: #1a1e28;
+    font: inherit;
+    font-size: 0.72rem;
+    color: #c9cfda;
+
+    &--more {
+        border-style: dashed;
+        color: var(--muted);
+        cursor: pointer;
+
+        &:hover {
+            color: var(--text);
+            border-color: var(--muted);
+        }
+    }
+}
+
+.error {
+    padding: 1.25rem 1rem;
+    border: 1px solid #5a2a22;
+    border-radius: var(--radius-l);
+    background: #1a1411;
+    text-align: center;
+
+    &__title {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    &__message {
+        margin: 0 0 0.9rem;
+        color: #c9cfda;
+    }
+
+    // The banner for errors that escaped every handler; sits above whatever the page was showing.
+    &--unexpected {
+        margin-bottom: 1.25rem;
+    }
+}
+
+.next {
+    margin-top: 0.9rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    font-size: 0.85rem;
+
+    p {
+        margin: 0;
+        color: #c9cfda;
+    }
+
+    &__eyebrow {
+        margin: 0 0 0.25rem !important;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent) !important;
+    }
+
+    code {
+        padding: 0.05rem 0.35rem;
+        border-radius: 4px;
+        background: #1a1e28;
+        font-family: inherit;
+        font-size: 0.8rem;
+    }
+}
+
+.footnote {
+    margin-top: 1.25rem;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--muted);
+
+    p {
+        margin: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding-top: 2rem;
+    }
+
+    .headline {
+        font-size: 1.7rem;
+    }
+
+    .rail {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+
+        &__step {
+            grid-template-columns: auto auto 1fr;
+            padding: 0.45rem 0.65rem;
+        }
+
+        &__hint {
+            grid-column: 3;
+            text-align: right;
+        }
+    }
+
+    // Four numbers become a 2 × 2 grid.
+    .receipt__numbers {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .receipt__number {
+        &:nth-child(2n) {
+            border-right: 0;
+        }
+
+        &:nth-child(-n + 2) {
+            border-bottom: 1px solid var(--border);
+        }
+
+        dd {
+            font-size: 1.4rem;
+        }
+    }
+
+    .receipt__actions {
+        flex-direction: column;
+    }
+
+    // Tap targets of at least 44 px and body-sized small text on phones.
+    .btn {
+        min-height: 44px;
+    }
+
+    .chip--more {
+        min-height: 44px;
+        padding: 0.5rem 0.9rem;
+    }
+
+    .rail__step,
+    .trust,
+    .chip,
+    .receipt__unmapped,
+    .receipt__number dt,
+    .receipt__hint {
+        font-size: 0.8rem;
+    }
+
+    .footnote {
+        font-size: 0.78rem;
+    }
+}

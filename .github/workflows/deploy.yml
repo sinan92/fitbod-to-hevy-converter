@@ -6,36 +6,40 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    # Pinned image and pinned action commits: a deploy years from now runs the same steps as today.
+    # "ubuntu-latest" and "@v4" move on their own; bump these deliberately (the comments carry the version).
+    runs-on: ubuntu-24.04
     environment: STRATO
     env:
       # Path under which the app is hosted, e.g. "/fitbod-to-hevy/". Set as a repository or
       # environment variable named BASE_HREF; defaults to the web root.
       BASE_HREF: ${{ vars.BASE_HREF || '/' }}
+      # Angular's application builder writes the deployable site to the browser/ subfolder.
+      OUTPUT_DIR: dist/fitbod-to-hevy-converter/browser
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run unit tests
-        run: npx ng test --watch=false --browsers=ChromeHeadless --progress=false
+        run: npx ng test --watch=false
 
       - name: Build Angular application
-        run: npx ng build --configuration production --base-href "$BASE_HREF" --progress=false
+        run: npx ng build --configuration production --base-href "$BASE_HREF"
 
       - name: Add .htaccess for routing
         run: |
-          cat > dist/fitbod-to-hevy-converter/.htaccess << EOL
+          cat > "$OUTPUT_DIR/.htaccess" << EOL
           <IfModule mod_rewrite.c>
             RewriteEngine On
             RewriteBase ${BASE_HREF}
@@ -60,10 +64,12 @@ jobs:
           </IfModule>
           EOL
 
+      # lftp comes from the pinned Ubuntu image's own package archive, so its version only changes
+      # when the image above is bumped.
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      # This Strato package only offers SFTP + SSH (plain FTP resets the connection),
+      # This Strato package only offers SFTP + SSH (plain FTP and FTPS reset the connection),
       # so upload with lftp over SFTP using password authentication.
       - name: Deploy to Strato via SFTP
         env:
@@ -77,5 +83,5 @@ jobs:
             set sftp:auto-confirm yes;
             set net:max-retries 3;
             set net:timeout 30;
-            mirror --reverse --verbose --parallel=4 ./dist/fitbod-to-hevy-converter/ \"$REMOTE_PATH\";
+            mirror --reverse --verbose --parallel=4 ./$OUTPUT_DIR/ \"$REMOTE_PATH\";
             bye"
