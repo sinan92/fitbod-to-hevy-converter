@@ -76,6 +76,8 @@ jobs:
           SFTP_SERVER: ${{ secrets.STRATO_SFTP_SERVER }}
           SFTP_USER: ${{ secrets.STRATO_FTP_USERNAME }}
           LFTP_PASSWORD: ${{ secrets.STRATO_FTP_PASSWORD }}
+          # Relative to the SFTP login directory, no spaces, no quotes: lftp took an escaped quote
+          # here literally once and uploaded everything into a folder named `"STRATO-apps`.
           REMOTE_PATH: ${{ secrets.STRATO_SERVER_PATH }}
         run: |
           # --env-password reads LFTP_PASSWORD, so any character in the password is safe
@@ -83,5 +85,26 @@ jobs:
             set sftp:auto-confirm yes;
             set net:max-retries 3;
             set net:timeout 30;
-            mirror --reverse --verbose --parallel=4 ./$OUTPUT_DIR/ \"$REMOTE_PATH\";
+            mirror --reverse --verbose --parallel=4 ./$OUTPUT_DIR/ $REMOTE_PATH;
             bye"
+
+      # A deploy that lands in the wrong folder still reports success above. This step fails the run
+      # unless the public page really references the bundle that was just built.
+      - name: Verify the live site serves this build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "::error::Repository variable SITE_URL is not set (e.g. https://sintaxcode.nl/fitbod-to-hevy-converter/)."
+            exit 1
+          fi
+          bundle=$(basename "$OUTPUT_DIR"/main-*.js)
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS "$SITE_URL" | grep -q "$bundle"; then
+              echo "$SITE_URL serves $bundle"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$SITE_URL does not serve $bundle. Check the STRATO_SERVER_PATH secret."
+          exit 1
