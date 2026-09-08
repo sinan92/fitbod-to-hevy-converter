@@ -118,6 +118,57 @@ describe('App', () => {
         expect(saveFile).not.toHaveBeenCalled();
     });
 
+    it('offers Download again only, where the browser cannot share files', async () => {
+        await drop(new File([VALID_EXPORT], 'WorkoutExport.csv'));
+        const labels = [...element.querySelectorAll('.receipt__actions .btn')].map((b) => b.textContent?.trim());
+        expect(labels).toEqual(['Download again', 'Convert another file']);
+        expect(element.querySelector('.receipt__hint')).toBeNull();
+    });
+
+    it('offers Save file first on devices with a file share sheet', async () => {
+        const share = vi.fn().mockResolvedValue(undefined);
+        Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
+        Object.defineProperty(navigator, 'share', { value: share, configurable: true });
+        try {
+            fixture = TestBed.createComponent(App);
+            app = fixture.componentInstance;
+            element = fixture.nativeElement as HTMLElement;
+            vi.spyOn(app, 'saveFile').mockImplementation(() => undefined);
+            await drop(new File([VALID_EXPORT], 'WorkoutExport.csv'));
+
+            const labels = [...element.querySelectorAll('.receipt__actions .btn')].map((b) => b.textContent?.trim());
+            expect(labels).toEqual(['Save file', 'Download again', 'Convert another file']);
+            expect(text('.receipt__hint')).toContain('Save file');
+
+            (element.querySelector('.receipt__actions .btn') as HTMLButtonElement).click();
+            await fixture.whenStable();
+            expect(share).toHaveBeenCalledTimes(1);
+            const shared = share.mock.calls[0][0] as { files: File[] };
+            expect(shared.files[0].name).toBe(OUTPUT_FILE_NAME);
+            expect(app.phase()).toBe('done');
+        } finally {
+            Object.defineProperty(navigator, 'canShare', { value: undefined, configurable: true });
+            Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
+        }
+    });
+
+    it('keeps the receipt when the user cancels the share sheet', async () => {
+        Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
+        Object.defineProperty(navigator, 'share', { value: () => Promise.reject(new DOMException('cancelled', 'AbortError')), configurable: true });
+        try {
+            fixture = TestBed.createComponent(App);
+            app = fixture.componentInstance;
+            vi.spyOn(app, 'saveFile').mockImplementation(() => undefined);
+            await drop(new File([VALID_EXPORT], 'WorkoutExport.csv'));
+            await app.shareFile();
+            expect(app.phase()).toBe('done');
+            expect(app.errorMessage()).toBe('');
+        } finally {
+            Object.defineProperty(navigator, 'canShare', { value: undefined, configurable: true });
+            Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
+        }
+    });
+
     it('starts a fresh conversion when a new file arrives after an error', async () => {
         await drop(new File(['nope'], 'x.csv'));
         expect(app.phase()).toBe('error');

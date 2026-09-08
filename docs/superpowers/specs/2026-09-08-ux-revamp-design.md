@@ -123,3 +123,18 @@ from state with `computed()`.
 ## Non-goals
 
 - Light theme, i18n, editing the exercise mappings in the UI, multiple files, persisting anything.
+
+## Addendum 2026-09-08 — mobile and accessibility pass
+
+Measured on a 375 × 812 viewport after the first build; all applied:
+
+- **Save file on phones.** Where `navigator.canShare({ files })` is true (iOS 15+, Android), the receipt shows
+  `Save file` as the primary action (system share sheet → "Save to Files"), `Download again` becomes secondary,
+  and a hint explains why. A blob download on iOS can open the CSV as text instead of saving it.
+- **Tap targets ≥ 44 px** on phones for all buttons and the `+ N more` chip.
+- **Contrast**: footnote and trust line use the muted grey (6.3:1); button text is dark on the accent (6.3:1)
+  instead of white (3.1:1).
+- **Small text** raised to 0.8rem on phones (rail hints, chips, labels, trust line), footnote 0.78rem.
+- **Receipt semantics**: `dt` precedes `dd` in the DOM, reversed visually.
+- `accept=".csv,text/csv,text/plain"` so iOS never greys out the export in the picker.
+- `viewport-fit=cover` plus `env(safe-area-inset-*)` padding for notched phones.

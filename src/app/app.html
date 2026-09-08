@@ -38,16 +38,16 @@
                         </header>
                         <dl class="receipt__numbers">
                             <div class="receipt__number">
-                                <dd>{{ r.setCount | number }}</dd>
                                 <dt>sets</dt>
+                                <dd>{{ r.setCount | number }}</dd>
                             </div>
                             <div class="receipt__number">
-                                <dd>{{ r.workoutCount | number }}</dd>
                                 <dt>workouts</dt>
+                                <dd>{{ r.workoutCount | number }}</dd>
                             </div>
                             <div class="receipt__number" [class.receipt__number--warn]="unmappedCount() > 0">
-                                <dd>{{ unmappedCount() | number }}</dd>
                                 <dt>without mapping</dt>
+                                <dd>{{ unmappedCount() | number }}</dd>
                             </div>
                         </dl>
                         @if (unmappedCount() > 0) {
@@ -68,9 +68,17 @@
                             </div>
                         }
                         <div class="receipt__actions">
-                            <button type="button" class="btn" (click)="download()">Download again</button>
+                            @if (canShareFile()) {
+                                <button type="button" class="btn" (click)="shareFile()">Save file</button>
+                                <button type="button" class="btn btn--ghost" (click)="download()">Download again</button>
+                            } @else {
+                                <button type="button" class="btn" (click)="download()">Download again</button>
+                            }
                             <button type="button" class="btn btn--ghost" (click)="reset()">Convert another file</button>
                         </div>
+                        @if (canShareFile()) {
+                            <p class="receipt__hint">On a phone, use <strong>Save file</strong> to put it in your Files app, where Hevy can find it.</p>
+                        }
                     </article>
                 }
             }
@@ -90,7 +98,7 @@
                     (dragleave)="onDragLeave()"
                     (drop)="onDrop($event)"
                 >
-                    <input type="file" accept=".csv,text/csv" class="sr-only" (change)="onFileInput($event)" />
+                    <input type="file" accept=".csv,text/csv,text/plain" class="sr-only" (change)="onFileInput($event)" />
                     <span class="drop__icon" aria-hidden="true">↓</span>
                     @if (phase() === 'reading') {
                         <span class="drop__title">Converting {{ fileName() }}…</span>

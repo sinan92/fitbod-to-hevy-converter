@@ -34,6 +34,8 @@ export class App {
     readonly errorMessage = signal('');
     readonly dragging = signal(false);
     readonly showAllUnmapped = signal(false);
+    /** True on phones and tablets whose browser can hand a file to the share sheet (iOS: "Save to Files"). */
+    readonly canShareFile = signal(detectFileSharing());
 
     /** The three-step rail doubles as the progress indicator. */
     readonly steps = computed<Step[]>(() => {
@@ -132,6 +134,25 @@ export class App {
         }
     }
 
+    /**
+     * Hands the file to the system share sheet. On iOS this is the reliable way to get it into the Files app,
+     * where Hevy can pick it up; a blob download may open the CSV as text instead. Cancelling is not an error.
+     */
+    async shareFile(): Promise<void> {
+        const result = this.result();
+        if (!result) {
+            return;
+        }
+        const file = new File([result.csv], OUTPUT_FILE_NAME, { type: 'text/csv' });
+        try {
+            await navigator.share({ files: [file], title: 'Fitbod to Hevy' });
+        } catch (e) {
+            if (!(e instanceof DOMException && e.name === 'AbortError')) {
+                this.fail('Sharing did not work on this device. Use "Download again" instead.');
+            }
+        }
+    }
+
     /** Separate so tests can stub the browser download. */
     saveFile(file: File): void {
         const url = URL.createObjectURL(file);
@@ -146,6 +167,15 @@ export class App {
     private fail(message: string): void {
         this.errorMessage.set(message);
         this.phase.set('error');
+    }
+}
+
+/** Web Share with files exists on iOS 15+, Android Chrome and Safari; not on desktop browsers or the test DOM. */
+function detectFileSharing(): boolean {
+    try {
+        return typeof navigator.canShare === 'function' && navigator.canShare({ files: [new File([''], 'probe.csv', { type: 'text/csv' })] });
+    } catch {
+        return false;
     }
 }
 
