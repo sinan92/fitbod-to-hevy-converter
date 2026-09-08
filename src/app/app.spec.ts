@@ -106,6 +106,7 @@ describe('App', () => {
         expect(text('.headline')).toBe('Done. Check, then import.');
         expect(text('.lead')).toBe(`${OUTPUT_FILE_NAME} is downloading. Not there? Use Download again below.`);
         expect(text('.receipt__file')).toBe('WorkoutExport.csv converted');
+        expect(text('.receipt__format')).toBe('Fitbod app export');
         expect(text('.receipt__range')).toBe('2025-01 → 2025-01');
         expect(receiptNumbers()).toEqual(['1', '1', '0', '0']);
         expect(railStates()).toEqual(['done', 'done', 'active']);
@@ -185,18 +186,72 @@ describe('App', () => {
         expect(railStates()).toEqual(['pending', 'active', 'pending']);
     });
 
-    it('shows the converter message for a file that is not a Fitbod export, with a way back', async () => {
+    it('asks the user to map the columns of a file it does not recognise, with a way back', async () => {
         await drop(new File(['hello,world\n1,2\n'], 'notes.csv'));
 
-        expect(app.phase()).toBe('error');
-        expect(text('[role=alert]')).toContain('Conversion failed.');
-        expect(text('.error__message')).toContain('does not look like a Fitbod export');
+        expect(app.phase()).toBe('mapping');
+        expect(text('.mapping__title')).toBe("We don't recognise these columns. Tell us which is which.");
+        expect(text('.mapping__sub')).toBe('Found in notes.csv: hello, world');
+        expect(element.querySelectorAll('.mapping__select')).toHaveLength(8);
         expect(railStates()).toEqual(['done', 'active', 'pending']);
+        expect(text('.rail__step--active .rail__hint')).toBe('Map the columns');
+        expect((element.querySelector('.mapping__actions .btn') as HTMLButtonElement).disabled).toBe(true);
         expect(saveFile).not.toHaveBeenCalled();
 
-        (element.querySelector('[role=alert] .btn') as HTMLButtonElement).click();
+        (element.querySelector('.mapping__actions .btn--ghost') as HTMLButtonElement).click();
         await fixture.whenStable();
         expect(app.phase()).toBe('idle');
+    });
+
+    it('prefills the mapping from the column names and converts once the user confirms it', async () => {
+        await drop(new File(['When,Movement,Repetitions,Load (kg),Warm\n2025-06-23,Back Squat,5,100,false\n'], 'export.csv'));
+
+        expect(app.phase()).toBe('mapping');
+        expect(app.mapping()).toEqual({ date: 'When', exercise: 'Movement', reps: 'Repetitions', weight: 'Load (kg)', warmup: 'Warm' });
+        const selected = [...element.querySelectorAll('.mapping__select')].map((s) => (s as HTMLSelectElement).value);
+        expect(selected).toEqual(['When', 'Movement', 'Repetitions', 'Load (kg)', '', '', 'Warm', '']);
+        expect([...element.querySelectorAll('.mapping__preview')].map((p) => p.textContent?.trim())).toEqual([
+            'e.g. 2025-06-23', 'e.g. Back Squat', 'e.g. 5', 'e.g. 100', '', '', 'e.g. false', '',
+        ]);
+        const submit = element.querySelector('.mapping__actions .btn') as HTMLButtonElement;
+        expect(submit.disabled).toBe(false);
+
+        submit.click();
+        await fixture.whenStable();
+
+        expect(app.phase()).toBe('done');
+        expect(text('.receipt__format')).toBe('Manual column mapping');
+        expect(receiptNumbers()).toEqual(['1', '1', '0', '0']);
+        expect(saveFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the mapping card open and shows the row error when a mapping does not fit the data', async () => {
+        await drop(new File(['When,Movement,Repetitions,Load (kg)\n2025-06-23,Back Squat,5,100\n'], 'export.csv'));
+        const repsSelect = element.querySelector('#map-reps') as HTMLSelectElement;
+        repsSelect.value = 'Movement';
+        repsSelect.dispatchEvent(new Event('change'));
+        await fixture.whenStable();
+
+        (element.querySelector('.mapping__actions .btn') as HTMLButtonElement).click();
+        await fixture.whenStable();
+
+        expect(app.phase()).toBe('mapping');
+        expect(text('.mapping__error')).toBe('Row 1: "Back Squat" in column Movement is not a number.');
+        expect(saveFile).not.toHaveBeenCalled();
+
+        repsSelect.value = 'Repetitions';
+        repsSelect.dispatchEvent(new Event('change'));
+        await fixture.whenStable();
+        expect(element.querySelector('.mapping__error')).toBeNull();
+    });
+
+    it('converts the Fitbod support export without asking for a mapping', async () => {
+        await drop(new File(['date,exercise_name,Reps,weight_kg,duration_seconds,distance_meters,Incline,Resistance,isWarmup\n2025-06-23,Seated Leg Curl,5,31.751465900000003,,,,,false\n'], 'bquxjob.csv'));
+
+        expect(app.phase()).toBe('done');
+        expect(text('.receipt__format')).toBe('Fitbod support export');
+        expect(text('.receipt__range')).toBe('2025-06 → 2025-06');
+        expect(saveFile).toHaveBeenCalledTimes(1);
     });
 
     it('refuses more than one file at a time', async () => {
@@ -306,9 +361,11 @@ describe('App', () => {
         expect(text('.error__message')).toBe('Sharing did not work on this device. Use "Download again" instead.');
     });
 
-    it('starts a fresh conversion when a new file arrives after an error', async () => {
-        await drop(new File(['nope'], 'x.csv'));
+    it('starts a fresh conversion when a new file arrives after an error or an unrecognised file', async () => {
+        await drop(new File([VALID_EXPORT], 'a.csv'), new File([VALID_EXPORT], 'b.csv'));
         expect(app.phase()).toBe('error');
+        await drop(new File(['nope\n1\n'], 'x.csv'));
+        expect(app.phase()).toBe('mapping');
         await drop(new File([VALID_EXPORT], 'WorkoutExport.csv'));
         expect(app.phase()).toBe('done');
         expect(app.errorMessage()).toBe('');

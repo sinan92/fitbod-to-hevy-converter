@@ -1,11 +1,13 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { ALL_FIELDS, ColumnMapping, FIELD_LABELS, MappingField, REQUIRED_FIELDS } from './converter/column-mapping';
 import { ConversionResult, convertFitbodExport, OUTPUT_FILE_NAME } from './converter/convert';
+import { parseCsv, UnknownFormatError } from './converter/fitbod-csv';
 import { formatLocalDate } from './converter/hevy-csv';
 import { VisibleErrorHandler } from './visible-error-handler';
 
 /** What the page is doing. Everything shown is derived from this plus the file name and the result. */
-export type Phase = 'idle' | 'reading' | 'done' | 'error';
+export type Phase = 'idle' | 'reading' | 'mapping' | 'done' | 'error';
 export type StepState = 'pending' | 'active' | 'done';
 
 export interface Step {
@@ -42,13 +44,33 @@ export class App {
     /** True on phones and tablets whose browser can hand a file to the share sheet (iOS: "Save to Files"). */
     readonly canShareFile = signal(detectFileSharing());
 
+    // Manual column mapping, used when the file's header matches no known format.
+    /** The file's text, kept so it can be converted again once the user has mapped the columns. */
+    private fileText = '';
+    /** Column names found in the file, in file order. */
+    readonly mappingHeader = signal<string[]>([]);
+    /** First data row, shown next to each select so the user can check their choice. */
+    private previewRow: string[] = [];
+    /** The user's choice per field; missing or '' means not mapped. */
+    readonly mapping = signal<Partial<ColumnMapping>>({});
+    /** Converter error for the current mapping, shown inside the mapping card. */
+    readonly mappingError = signal('');
+    readonly mappingFields = ALL_FIELDS;
+    readonly mappingReady = computed(() => REQUIRED_FIELDS.every((field) => !!this.mapping()[field]));
+
     /** The three-step rail doubles as the progress indicator. */
     readonly steps = computed<Step[]>(() => {
         const phase = this.phase();
         const fileName = this.fileName();
         const result = this.result();
         const convertHint =
-            phase === 'reading' ? 'Converting…' : result ? `${result.setCount.toLocaleString('en-US')} ${result.setCount === 1 ? 'set' : 'sets'}` : 'Drop the file here';
+            phase === 'reading'
+                ? 'Converting…'
+                : phase === 'mapping'
+                  ? 'Map the columns'
+                  : result
+                    ? `${result.setCount.toLocaleString('en-US')} ${result.setCount === 1 ? 'set' : 'sets'}`
+                    : 'Drop the file here';
         return [
             { number: 1, title: 'Export', hint: fileName || 'Fitbod → Log → ⋯ → Export Data', state: fileName ? 'done' : 'pending' },
             { number: 2, title: 'Convert', hint: convertHint, state: phase === 'done' ? 'done' : 'active' },
@@ -114,13 +136,51 @@ export class App {
         this.fileName.set(file.name);
         this.phase.set('reading');
         try {
-            const text = await readFileAsText(file);
-            const result = convertFitbodExport(text);
-            this.result.set(result);
-            this.phase.set('done');
-            this.download();
+            this.fileText = await readFileAsText(file);
+            this.finish(convertFitbodExport(this.fileText));
         } catch (e) {
-            this.fail(e instanceof Error ? e.message : String(e));
+            if (e instanceof UnknownFormatError) {
+                this.askForMapping(e);
+            } else {
+                this.fail(e instanceof Error ? e.message : String(e));
+            }
+        }
+    }
+
+    // --- manual column mapping ---
+
+    fieldLabel(field: MappingField): string {
+        return FIELD_LABELS[field];
+    }
+
+    isRequired(field: MappingField): boolean {
+        return (REQUIRED_FIELDS as readonly MappingField[]).includes(field);
+    }
+
+    setMapping(field: MappingField, column: string): void {
+        this.mapping.update((current) => ({ ...current, [field]: column || undefined }));
+        this.mappingError.set('');
+    }
+
+    /** The first data row's value for the column chosen for this field, so the user can check the choice. */
+    previewFor(field: MappingField): string {
+        const column = this.mapping()[field];
+        if (!column) {
+            return '';
+        }
+        const index = this.mappingHeader().indexOf(column);
+        return index >= 0 ? (this.previewRow[index] ?? '') : '';
+    }
+
+    /** Converts the kept file text with the user's mapping; converter errors stay inside the card. */
+    convertWithMapping(): void {
+        if (!this.mappingReady()) {
+            return;
+        }
+        try {
+            this.finish(convertFitbodExport(this.fileText, this.mapping() as ColumnMapping));
+        } catch (e) {
+            this.mappingError.set(e instanceof Error ? e.message : String(e));
         }
     }
 
@@ -128,9 +188,14 @@ export class App {
     reset(): void {
         this.phase.set('idle');
         this.fileName.set('');
+        this.fileText = '';
         this.result.set(null);
         this.errorMessage.set('');
         this.showAllUnmapped.set(false);
+        this.mappingHeader.set([]);
+        this.previewRow = [];
+        this.mapping.set({});
+        this.mappingError.set('');
     }
 
     /** Starts (or restarts) the download of the last conversion. */
@@ -176,6 +241,21 @@ export class App {
         anchor.remove();
         // Revoke later: some browsers start the download asynchronously.
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    }
+
+    private finish(result: ConversionResult): void {
+        this.result.set(result);
+        this.mappingError.set('');
+        this.phase.set('done');
+        this.download();
+    }
+
+    private askForMapping(error: UnknownFormatError): void {
+        this.mappingHeader.set([...error.header]);
+        this.previewRow = parseCsv(this.fileText)[1] ?? [];
+        this.mapping.set({ ...error.suggestion });
+        this.mappingError.set('');
+        this.phase.set('mapping');
     }
 
     /** The converted CSV as a file, or null before a conversion. */

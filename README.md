@@ -35,6 +35,19 @@ Input handling: columns are looked up by header name, values are trimmed (Fitbod
 blank lines and a UTF-8 BOM are ignored, quoted fields with commas are supported. Anything that is not a Fitbod
 export is rejected with a message that names the missing column or the bad row.
 
+### Input formats
+
+| Format | How you get it | Header |
+|---|---|---|
+| Fitbod app export | Fitbod → Log → ⋯ → Export Data (iOS) | `Date,Exercise,Reps,Weight(kg),Duration(s),Distance(m),Incline,Resistance,isWarmup,Note,multiplier` |
+| Fitbod support export | Android has no export; Fitbod support mails a database extract | `date,exercise_name,Reps,weight_kg,duration_seconds,distance_meters,Incline,Resistance,isWarmup` |
+| Any other CSV | Map the columns yourself | The page asks which column is the date, exercise, reps and weight (plus optional duration, distance, warm-up flag, note) |
+
+The support export has no time of day, so all sets of one day become one workout; weights are rounded to
+0.01 kg and distances to 0.1 m because that export carries lb-to-kg conversion noise. Formats live in
+`src/app/converter/column-mapping.ts`: a format is a named column mapping, and a manual mapping is the same
+object filled in by the user.
+
 ## Develop
 
 Requires Node 24 (`.nvmrc`). Angular 22, standalone + zoneless, Vitest.
