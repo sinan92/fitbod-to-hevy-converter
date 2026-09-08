@@ -1,7 +1,10 @@
-# Fitbod → Hevy converter
+# Fitbod to Hevy converter
 
-Converts a Fitbod `WorkoutExport.csv` into a Strong-format CSV that [Hevy](https://www.hevyapp.com/) imports.
-Everything runs in the browser; no data leaves your machine.
+**Use it: https://sintaxcode.nl/fitbod-to-hevy-converter/** — runs in the browser, nothing is uploaded.
+
+Hevy only imports CSV files in the Strong app's format. This converter turns a Fitbod `WorkoutExport.csv` into
+that format so a Fitbod workout history can be imported into [Hevy](https://www.hevyapp.com/): every workout,
+set, weight, rep, warm-up and note.
 
 ## Use it
 
@@ -47,11 +50,18 @@ The converter itself (`src/app/converter/`) has no Angular or DOM dependency and
 `app.ts` only owns the drop zone, file reading and the download. Errors that escape a handler are shown in a
 banner (`visible-error-handler.ts`), never only in the console.
 
+The build prerenders the single route at build time (`outputMode: "static"`, `src/main.server.ts`,
+`src/app/app.config.server.ts`), so `browser/index.html` already contains the page text and the app hydrates
+on load. There is no Node server; anything that touches `window`, `document` or `navigator` outside an event
+handler must be guarded.
+
 ## Deploy
 
 `.github/workflows/deploy.yml` runs the tests, builds and uploads `dist/fitbod-to-hevy-converter/browser` to
 Strato over SFTP (lftp) on every push to `main`. The runner image and the actions are pinned (image tag and
 commit SHAs) so a deploy years from now runs the same steps; bump them deliberately. This Strato package only offers SFTP + SSH; plain FTP and
 FTPS reset the connection. GitHub environment `STRATO` needs the secrets `STRATO_SFTP_SERVER`,
-`STRATO_FTP_USERNAME`, `STRATO_FTP_PASSWORD`, `STRATO_SERVER_PATH` and the variable `BASE_HREF`
-(`/fitbod-to-hevy/` on the current host; defaults to `/`).
+`STRATO_FTP_USERNAME`, `STRATO_FTP_PASSWORD`, `STRATO_SERVER_PATH` and the variables `BASE_HREF`
+(`/fitbod-to-hevy-converter/` on the current host; defaults to `/`). `SITE_URL`
+(`https://sintaxcode.nl/fitbod-to-hevy-converter/`) is the public URL the last workflow step curls to verify
+that the deploy landed.

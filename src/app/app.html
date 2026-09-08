@@ -141,6 +141,46 @@
         </aside>
     }
 
+    <section class="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title" class="faq__title">Questions</h2>
+        <details class="faq__item">
+            <summary>Does Hevy import Fitbod workouts?</summary>
+            <p>
+                Not directly. Hevy only imports CSV files in the Strong app's format. This converter turns Fitbod's
+                <code>WorkoutExport.csv</code> into that format, so Hevy accepts it. Every workout, set, weight, rep, warm-up
+                and note comes along.
+            </p>
+        </details>
+        <details class="faq__item">
+            <summary>How do I export my workouts from Fitbod?</summary>
+            <p>
+                In Fitbod open <strong>Log</strong>, tap <strong>⋯</strong> and choose <strong>Export Data</strong>. Fitbod sends
+                <code>WorkoutExport.csv</code>. Save it to your phone or computer, then drop it here.
+            </p>
+        </details>
+        <details class="faq__item">
+            <summary>Is my workout data uploaded anywhere?</summary>
+            <p>
+                No. The file is read and converted by your browser. This page makes no network requests after it has loaded, has
+                no analytics, and the converted file goes straight to your downloads.
+            </p>
+        </details>
+        <details class="faq__item">
+            <summary>Why is the weight per dumbbell, not per pair?</summary>
+            <p>
+                Fitbod stores the weight of one dumbbell plus a multiplier (2 for a pair) that it only uses for volume. Hevy logs
+                the weight per dumbbell, so the converter writes the weight exactly as you logged it and ignores the multiplier.
+            </p>
+        </details>
+        <details class="faq__item">
+            <summary>Can I import into Hevy more than once?</summary>
+            <p>
+                Hevy allows one import per account. Check the receipt above first: the number of sets and workouts, the date
+                range, and the exercises Hevy does not know (those are created as custom exercises).
+            </p>
+        </details>
+    </section>
+
     <footer class="footnote">
         <p>
             Weights are written as logged (per dumbbell). Warm-up sets are marked as warm-ups. Fitbod exports no end time, so every

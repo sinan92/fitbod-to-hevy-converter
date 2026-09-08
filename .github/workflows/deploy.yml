@@ -39,10 +39,24 @@ jobs:
 
       - name: Add .htaccess for routing
         run: |
+          # Static output also emits index.csr.html (an empty client-side fallback). Never publish it:
+          # the rewrite below only masks paths that are not files, so it would be a reachable duplicate.
+          rm -f "$OUTPUT_DIR/index.csr.html"
           cat > "$OUTPUT_DIR/.htaccess" << EOL
           <IfModule mod_rewrite.c>
             RewriteEngine On
             RewriteBase ${BASE_HREF}
+
+            # One canonical origin: https, no www. The root .htaccess (WordPress) does not apply here
+            # because this file starts its own RewriteEngine, so repeat the redirects.
+            # Loop-safe when TLS is terminated in front of Apache: only redirect when no layer says https.
+            RewriteCond %{HTTPS} !=on
+            RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+            RewriteCond %{HTTP:X-Forwarded-SSL} !=on
+            RewriteRule ^ https://sintaxcode.nl%{REQUEST_URI} [R=301,L]
+
+            RewriteCond %{HTTP_HOST} ^www\. [NC]
+            RewriteRule ^ https://sintaxcode.nl%{REQUEST_URI} [R=301,L]
 
             # Serve index.html for any path that is not an existing file or directory (Angular routing)
             RewriteCond %{REQUEST_FILENAME} !-f
@@ -56,11 +70,12 @@ jobs:
             ExpiresByType text/css "access plus 1 year"
             ExpiresByType application/javascript "access plus 1 year"
             ExpiresByType image/x-icon "access plus 1 year"
+            ExpiresByType image/png "access plus 1 year"
             ExpiresByType text/html "access plus 0 seconds"
           </IfModule>
 
           <IfModule mod_deflate.c>
-            AddOutputFilterByType DEFLATE text/html text/css application/javascript
+            AddOutputFilterByType DEFLATE text/html text/css application/javascript application/xml
           </IfModule>
           EOL
 

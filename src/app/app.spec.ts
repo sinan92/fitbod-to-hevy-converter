@@ -70,6 +70,17 @@ describe('App', () => {
         await fixture.whenStable();
     }
 
+    it('answers the five import questions', () => {
+        const questions = [...element.querySelectorAll('.faq details summary')].map((s) => s.textContent?.trim());
+        expect(questions).toEqual([
+            'Does Hevy import Fitbod workouts?',
+            'How do I export my workouts from Fitbod?',
+            'Is my workout data uploaded anywhere?',
+            'Why is the weight per dumbbell, not per pair?',
+            'Can I import into Hevy more than once?',
+        ]);
+    });
+
     it('opens with the drop zone and step 2 active', () => {
         expect(text('.headline')).toBe('Fitbod to Hevy converter');
         expect(text('.lead')).toBe(
