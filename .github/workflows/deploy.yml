@@ -60,12 +60,21 @@ jobs:
           </IfModule>
           EOL
 
-      - name: Deploy to Strato via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ftp.strato.com
-          username: ${{ secrets.STRATO_FTP_USERNAME }}
-          password: ${{ secrets.STRATO_FTP_PASSWORD }}
-          local-dir: ./dist/fitbod-to-hevy-converter/
-          server-dir: ${{ secrets.STRATO_SERVER_PATH }}
-          state-name: ".ftp-deploy-sync-state.json"
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # This Strato package only offers SFTP + SSH (plain FTP resets the connection),
+      # so upload with lftp over SFTP using password authentication.
+      - name: Deploy to Strato via SFTP
+        env:
+          SFTP_SERVER: ${{ secrets.STRATO_SFTP_SERVER }}
+          SFTP_USER: ${{ secrets.STRATO_FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.STRATO_FTP_PASSWORD }}
+          REMOTE_PATH: ${{ secrets.STRATO_SERVER_PATH }}
+        run: |
+          lftp -u "$SFTP_USER,$SFTP_PASS" "sftp://$SFTP_SERVER:22" -e "
+            set sftp:auto-confirm yes;
+            set net:max-retries 3;
+            set net:timeout 30;
+            mirror --reverse --verbose --parallel=4 ./dist/fitbod-to-hevy-converter/ \"$REMOTE_PATH\";
+            bye"
