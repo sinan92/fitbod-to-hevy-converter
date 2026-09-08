@@ -196,6 +196,9 @@ export class App {
  * offered on touch-first devices only; desktop browsers keep the plain download.
  */
 function detectFileSharing(): boolean {
+    if (typeof window === 'undefined') {
+        return false;
+    }
     try {
         return (
             typeof window.matchMedia === 'function' &&
