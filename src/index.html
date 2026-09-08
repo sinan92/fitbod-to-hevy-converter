@@ -2,12 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Fitbod to Hevy converter</title>
+  <title>Fitbod to Hevy converter – WorkoutExport.csv to Strong CSV</title>
+  <meta name="description" content="Converts a Fitbod WorkoutExport.csv into the Strong-format CSV that Hevy imports. Runs in the browser, nothing is uploaded.">
+  <link rel="canonical" href="https://sintaxcode.nl/fitbod-to-hevy-converter/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#0b0d12">
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Convert a Fitbod WorkoutExport.csv into a CSV that Hevy can import. Runs entirely in your browser.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sintax Code">
+  <meta property="og:url" content="https://sintaxcode.nl/fitbod-to-hevy-converter/">
+  <meta property="og:title" content="Fitbod to Hevy converter">
+  <meta property="og:description" content="Converts a Fitbod WorkoutExport.csv into the Strong-format CSV that Hevy imports. Runs in the browser, nothing is uploaded.">
+  <meta property="og:image" content="https://sintaxcode.nl/fitbod-to-hevy-converter/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Fitbod to Hevy converter: WorkoutExport.csv in, Strong-format CSV out">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Fitbod to Hevy converter">
+  <meta name="twitter:description" content="Converts a Fitbod WorkoutExport.csv into the Strong-format CSV that Hevy imports. Runs in the browser, nothing is uploaded.">
+  <meta name="twitter:image" content="https://sintaxcode.nl/fitbod-to-hevy-converter/og.png">
+  <meta name="twitter:image:alt" content="Fitbod to Hevy converter: WorkoutExport.csv in, Strong-format CSV out">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Fitbod to Hevy converter",
+    "url": "https://sintaxcode.nl/fitbod-to-hevy-converter/",
+    "description": "Converts a Fitbod WorkoutExport.csv into the Strong-format CSV that Hevy imports, so a Fitbod workout history can be imported into Hevy. Runs in the browser, nothing is uploaded.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript. Works on phones and desktops.",
+    "isAccessibleForFree": true,
+    "image": "https://sintaxcode.nl/fitbod-to-hevy-converter/og.png",
+    "author": { "@type": "Person", "name": "Sinan Samet", "url": "https://sintaxcode.nl/en/" },
+    "codeRepository": "https://github.com/sinan92/fitbod-to-hevy-converter"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "url": "https://sintaxcode.nl/fitbod-to-hevy-converter/",
+    "mainEntity": [
+      { "@type": "Question", "name": "Does Hevy import Fitbod workouts?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Not directly. Hevy only imports CSV files in the Strong app's format. This converter turns Fitbod's WorkoutExport.csv into that format, so Hevy accepts it. Every workout, set, weight, rep, warm-up and note comes along." } },
+      { "@type": "Question", "name": "How do I export my workouts from Fitbod?",
+        "acceptedAnswer": { "@type": "Answer", "text": "In Fitbod open Log, tap ⋯ and choose Export Data. Fitbod sends WorkoutExport.csv. Save it to your phone or computer, then drop it here." } },
+      { "@type": "Question", "name": "Is my workout data uploaded anywhere?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. The file is read and converted by your browser. This page makes no network requests after it has loaded, has no analytics, and the converted file goes straight to your downloads." } },
+      { "@type": "Question", "name": "Why is the weight per dumbbell, not per pair?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Fitbod stores the weight of one dumbbell plus a multiplier (2 for a pair) that it only uses for volume. Hevy logs the weight per dumbbell, so the converter writes the weight exactly as you logged it and ignores the multiplier." } },
+      { "@type": "Question", "name": "Can I import into Hevy more than once?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Hevy allows one import per account. Check the receipt above first: the number of sets and workouts, the date range, and the exercises Hevy does not know (those are created as custom exercises)." } }
+    ]
+  }
+  </script>
 </head>
 <body>
   <app-root></app-root>

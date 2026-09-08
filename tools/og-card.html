@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; background: #0b0d12; color: #eef0f4;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+  .card { box-sizing: border-box; width: 1200px; height: 630px; padding: 88px 96px; display: flex;
+    flex-direction: column; justify-content: space-between; }
+  .brand { font-size: 28px; color: #8b93a4; letter-spacing: .02em; }
+  .brand b { color: #ff5a36; }
+  h1 { margin: 0; font-size: 84px; line-height: 1.05; font-weight: 700; letter-spacing: -.02em; }
+  h1 em { font-style: normal; color: #ff5a36; }
+  .steps { display: flex; gap: 40px; font-size: 30px; color: #8b93a4; }
+  .steps span::before { content: attr(data-n); display: inline-grid; place-items: center; width: 44px;
+    height: 44px; margin-right: 14px; border-radius: 50%; border: 2px solid #1f2430; color: #eef0f4;
+    font-size: 22px; vertical-align: middle; }
+  .foot { font-size: 26px; color: #8b93a4; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand"><b>●</b> Fitbod → Hevy</div>
+  <h1>Fitbod to Hevy <em>converter</em></h1>
+  <div class="steps"><span data-n="1">Export</span><span data-n="2">Convert</span><span data-n="3">Import</span></div>
+  <div class="foot">Runs in the browser, nothing is uploaded · sintaxcode.nl</div>
+</div>
+</body>
+</html>
