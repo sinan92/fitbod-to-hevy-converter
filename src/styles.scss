@@ -1,3 +1,20 @@
+:root {
+    color-scheme: dark;
+    --bg: #0b0d12;
+    --surface: #12151c;
+    --surface-2: #0f1218;
+    --border: #1f2430;
+    --text: #eef0f4;
+    --muted: #8b93a4;
+    --accent: #ff5a36;
+    --success: #2ecc71;
+    --warning: #ffb020;
+    --radius-l: 14px;
+    --radius-m: 10px;
+    --radius-s: 9px;
+    --ease: 150ms ease;
+}
+
 html,
 body {
     height: 100%;
@@ -5,8 +22,72 @@ body {
 
 body {
     margin: 0;
+    background: var(--bg);
+    color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-size: 0.9rem;
     line-height: 1.5;
-    color: #222;
-    background: #fafafa;
+    -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-s);
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+    transition: background var(--ease), border-color var(--ease), transform var(--ease);
+
+    &:hover {
+        background: #ff6f50;
+        border-color: #ff6f50;
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+
+    &--ghost {
+        background: transparent;
+        border-color: var(--border);
+        color: var(--text);
+        font-weight: 600;
+
+        &:hover {
+            background: var(--surface);
+            border-color: var(--muted);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+    }
 }

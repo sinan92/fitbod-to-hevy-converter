@@ -1,62 +1,128 @@
 <main class="page">
-    <h1>Fitbod → Hevy converter</h1>
-    <p class="lead">
-        Drop your Fitbod <strong>WorkoutExport.csv</strong> below. You get a CSV in the Strong format that Hevy imports
-        (Profile → Settings → Import data). Everything runs in your browser; nothing is uploaded.
-    </p>
+    <p class="brand"><span class="brand__dot" aria-hidden="true"></span>Fitbod → Hevy</p>
 
-    <div
-        class="dropzone"
-        [class.dragging]="dragging()"
-        (dragover)="onDragOver($event)"
-        (dragleave)="onDragLeave()"
-        (drop)="onDrop($event)"
-    >
-        <p>Drop your WorkoutExport.csv here, or</p>
-        <label class="button">
-            Browse files
-            <input type="file" accept=".csv,text/csv" (change)="onFileInput($event)" hidden />
-        </label>
-    </div>
-
-    @if (status()) {
-        <p class="status" role="status">{{ status() }}</p>
-    }
-    @if (error()) {
-        <p class="error" role="alert">{{ error() }}</p>
+    @if (phase() === 'done') {
+        <h1 class="headline">Done. <em>Check,</em> then import.</h1>
+        <p class="lead">{{ outputFileName }} has been downloaded.</p>
+    } @else {
+        <h1 class="headline">Bring your whole history <em>with you.</em></h1>
+        <p class="lead">From Fitbod to Hevy in three steps. Everything runs in your browser; nothing is uploaded.</p>
     }
 
-    @if (result(); as r) {
-        <section class="result">
-            <button type="button" class="button" (click)="download()">Download again</button>
-            <dl>
-                <dt>Sets</dt>
-                <dd>{{ r.setCount }}</dd>
-                <dt>Workouts</dt>
-                <dd>{{ r.workoutCount }}</dd>
-                <dt>Warm-up sets</dt>
-                <dd>{{ r.warmupCount }}</dd>
-                <dt>Exercises without a Hevy mapping</dt>
-                <dd>{{ unmappedCount() }}</dd>
-            </dl>
-            @if (unmappedCount() > 0) {
-                <details>
-                    <summary>Show the {{ unmappedCount() }} unmapped exercise names</summary>
-                    <p>These are kept as-is. Hevy creates a custom exercise for each on import.</p>
-                    <ul>
-                        @for (name of r.unmappedExercises; track name) {
-                            <li>{{ name }}</li>
+    <ol class="rail" aria-label="Progress">
+        @for (step of steps(); track step.number) {
+            <li
+                class="rail__step"
+                [class.rail__step--pending]="step.state === 'pending'"
+                [class.rail__step--active]="step.state === 'active'"
+                [class.rail__step--done]="step.state === 'done'"
+                [attr.aria-current]="step.state === 'active' ? 'step' : null"
+            >
+                <span class="rail__number" aria-hidden="true">{{ step.state === 'done' ? '✓' : step.number }}</span>
+                <span class="sr-only">Step {{ step.number }} of 3, {{ step.state }}.</span>
+                <span class="rail__title">{{ step.title }}</span>
+                <span class="rail__hint">{{ step.hint }}</span>
+            </li>
+        }
+    </ol>
+
+    <section class="work" aria-live="polite">
+        @switch (phase()) {
+            @case ('done') {
+                @if (result(); as r) {
+                    <article class="receipt">
+                        <header class="receipt__head">
+                            <span class="receipt__check" aria-hidden="true">✓</span>
+                            <span class="receipt__file">{{ fileName() }} converted</span>
+                            <span class="receipt__range">{{ dateRange() }}</span>
+                        </header>
+                        <dl class="receipt__numbers">
+                            <div class="receipt__number">
+                                <dd>{{ r.setCount | number }}</dd>
+                                <dt>sets</dt>
+                            </div>
+                            <div class="receipt__number">
+                                <dd>{{ r.workoutCount | number }}</dd>
+                                <dt>workouts</dt>
+                            </div>
+                            <div class="receipt__number" [class.receipt__number--warn]="unmappedCount() > 0">
+                                <dd>{{ unmappedCount() | number }}</dd>
+                                <dt>without mapping</dt>
+                            </div>
+                        </dl>
+                        @if (unmappedCount() > 0) {
+                            <div class="receipt__unmapped">
+                                <p>{{ unmappedCount() | number }} exercises have no Hevy name and will be created as custom exercises:</p>
+                                <ul class="chips">
+                                    @for (name of visibleUnmapped(); track name) {
+                                        <li class="chip">{{ name }}</li>
+                                    }
+                                    @if (hiddenUnmappedCount() > 0) {
+                                        <li>
+                                            <button type="button" class="chip chip--more" (click)="showAllUnmapped.set(true)">
+                                                + {{ hiddenUnmappedCount() | number }} more
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         }
-                    </ul>
-                </details>
+                        <div class="receipt__actions">
+                            <button type="button" class="btn" (click)="download()">Download again</button>
+                            <button type="button" class="btn btn--ghost" (click)="reset()">Convert another file</button>
+                        </div>
+                    </article>
+                }
             }
-        </section>
+            @case ('error') {
+                <div class="error" role="alert">
+                    <p class="error__title">Conversion failed.</p>
+                    <p class="error__message">{{ errorMessage() }}</p>
+                    <button type="button" class="btn" (click)="reset()">Try another file</button>
+                </div>
+            }
+            @default {
+                <label
+                    class="drop"
+                    [class.drop--dragging]="dragging()"
+                    [class.drop--busy]="phase() === 'reading'"
+                    (dragover)="onDragOver($event)"
+                    (dragleave)="onDragLeave()"
+                    (drop)="onDrop($event)"
+                >
+                    <input type="file" accept=".csv,text/csv" class="sr-only" (change)="onFileInput($event)" />
+                    <span class="drop__icon" aria-hidden="true">↓</span>
+                    @if (phase() === 'reading') {
+                        <span class="drop__title">Converting {{ fileName() }}…</span>
+                    } @else {
+                        <span class="drop__title">Drop your <strong>WorkoutExport.csv</strong> here</span>
+                        <span class="drop__sub">or pick the file on your phone</span>
+                        <span class="btn">Choose file</span>
+                    }
+                </label>
+                <ul class="trust">
+                    <li>Stays on your device</li>
+                    <li>Done in a second</li>
+                    <li>Free, no account</li>
+                </ul>
+            }
+        }
+    </section>
+
+    @if (phase() === 'done') {
+        <aside class="next">
+            <p class="next__eyebrow">Step 3 · Import into Hevy</p>
+            <p>
+                Open Hevy → <code>Profile</code> → <code>Settings</code> → <code>Import data</code> → <code>Strong</code> and pick the
+                downloaded file. Hevy allows one import per account, so do this once the numbers above look right.
+            </p>
+        </aside>
     }
 
-    <footer>
+    <footer class="footnote">
         <p>
-            Fitbod does not export workout end times, so every workout is written with an estimated duration of 60 minutes.
-            Weights are written as logged (per dumbbell); warm-up sets are marked as warm-ups.
+            Weights are written as logged (per dumbbell). Warm-up sets are marked as warm-ups. Fitbod exports no end time, so every
+            workout gets an estimated 60 minutes.
         </p>
     </footer>
 </main>
