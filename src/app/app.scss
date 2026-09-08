@@ -260,7 +260,7 @@
 
     &__numbers {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         margin: 0;
     }
 
@@ -372,6 +372,11 @@
         margin: 0 0 0.9rem;
         color: #c9cfda;
     }
+
+    // The banner for errors that escaped every handler; sits above whatever the page was showing.
+    &--unexpected {
+        margin-bottom: 1.25rem;
+    }
 }
 
 .next {
@@ -441,8 +446,23 @@
         }
     }
 
-    .receipt__number dd {
-        font-size: 1.4rem;
+    // Four numbers become a 2 × 2 grid.
+    .receipt__numbers {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .receipt__number {
+        &:nth-child(2n) {
+            border-right: 0;
+        }
+
+        &:nth-child(-n + 2) {
+            border-bottom: 1px solid var(--border);
+        }
+
+        dd {
+            font-size: 1.4rem;
+        }
     }
 
     .receipt__actions {

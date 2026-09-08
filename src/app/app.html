@@ -1,9 +1,17 @@
 <main class="page">
     <p class="brand"><span class="brand__dot" aria-hidden="true"></span>Fitbod → Hevy</p>
 
+    @if (unexpected.message(); as message) {
+        <div class="error error--unexpected" role="alert">
+            <p class="error__title">Something went wrong.</p>
+            <p class="error__message">{{ message }}</p>
+            <button type="button" class="btn" (click)="reload()">Reload the page</button>
+        </div>
+    }
+
     @if (phase() === 'done') {
         <h1 class="headline">Done. <em>Check,</em> then import.</h1>
-        <p class="lead">{{ outputFileName }} has been downloaded.</p>
+        <p class="lead">{{ outputFileName }} is downloading. Not there? Use <strong>Download again</strong> below.</p>
     } @else {
         <h1 class="headline">Bring your whole history <em>with you.</em></h1>
         <p class="lead">From Fitbod to Hevy in three steps. Everything runs in your browser; nothing is uploaded.</p>
@@ -45,6 +53,10 @@
                                 <dt>workouts</dt>
                                 <dd>{{ r.workoutCount | number }}</dd>
                             </div>
+                            <div class="receipt__number">
+                                <dt>warm-ups</dt>
+                                <dd>{{ r.warmupCount | number }}</dd>
+                            </div>
                             <div class="receipt__number" [class.receipt__number--warn]="unmappedCount() > 0">
                                 <dt>without mapping</dt>
                                 <dd>{{ unmappedCount() | number }}</dd>
@@ -52,7 +64,11 @@
                         </dl>
                         @if (unmappedCount() > 0) {
                             <div class="receipt__unmapped">
-                                <p>{{ unmappedCount() | number }} exercises have no Hevy name and will be created as custom exercises:</p>
+                                @if (unmappedCount() === 1) {
+                                    <p>1 exercise has no Hevy name and will be created as a custom exercise:</p>
+                                } @else {
+                                    <p>{{ unmappedCount() | number }} exercises have no Hevy name and will be created as custom exercises:</p>
+                                }
                                 <ul class="chips">
                                     @for (name of visibleUnmapped(); track name) {
                                         <li class="chip">{{ name }}</li>

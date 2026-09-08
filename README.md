@@ -44,12 +44,14 @@ npm run build      # dist/fitbod-to-hevy-converter/browser
 ```
 
 The converter itself (`src/app/converter/`) has no Angular or DOM dependency and is fully unit-tested;
-`app.ts` only owns the drop zone, file reading and the download.
+`app.ts` only owns the drop zone, file reading and the download. Errors that escape a handler are shown in a
+banner (`visible-error-handler.ts`), never only in the console.
 
 ## Deploy
 
 `.github/workflows/deploy.yml` runs the tests, builds and uploads `dist/fitbod-to-hevy-converter/browser` to
-Strato over SFTP (lftp) on every push to `main`. This Strato package only offers SFTP + SSH; plain FTP and
+Strato over SFTP (lftp) on every push to `main`. The runner image and the actions are pinned (image tag and
+commit SHAs) so a deploy years from now runs the same steps; bump them deliberately. This Strato package only offers SFTP + SSH; plain FTP and
 FTPS reset the connection. GitHub environment `STRATO` needs the secrets `STRATO_SFTP_SERVER`,
 `STRATO_FTP_USERNAME`, `STRATO_FTP_PASSWORD`, `STRATO_SERVER_PATH` and the variable `BASE_HREF`
 (`/fitbod-to-hevy/` on the current host; defaults to `/`).

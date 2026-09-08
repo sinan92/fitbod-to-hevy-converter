@@ -6,7 +6,9 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    # Pinned image and pinned action commits: a deploy years from now runs the same steps as today.
+    # "ubuntu-latest" and "@v4" move on their own; bump these deliberately (the comments carry the version).
+    runs-on: ubuntu-24.04
     environment: STRATO
     env:
       # Path under which the app is hosted, e.g. "/fitbod-to-hevy/". Set as a repository or
@@ -16,12 +18,12 @@ jobs:
       OUTPUT_DIR: dist/fitbod-to-hevy-converter/browser
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -62,6 +64,8 @@ jobs:
           </IfModule>
           EOL
 
+      # lftp comes from the pinned Ubuntu image's own package archive, so its version only changes
+      # when the image above is bumped.
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 

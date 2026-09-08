@@ -43,6 +43,18 @@ describe('convertFitbodExport', () => {
         expect(result.lastWorkout.toISOString()).toBe('2023-10-25T17:00:00.000Z');
     });
 
+    it('handles an export with more sets than a JavaScript engine accepts as call arguments', () => {
+        // Math.min(...array) throws "Maximum call stack size exceeded" around 125k arguments.
+        const rows = Array.from({ length: 130_000 }, (_, i) => {
+            const day = new Date(Date.UTC(2015, 0, 1) + i * 2 * 3_600_000).toISOString().slice(0, 19).replace('T', ' ');
+            return `${day} +0000,Back Squat, 5,100.0,0.0,0.0,0.0,0.0,false,, 1.0`;
+        });
+        const result = convertFitbodExport([FITBOD_HEADER, ...rows].join('\n'));
+        expect(result.setCount).toBe(130_000);
+        expect(result.firstWorkout.toISOString()).toBe('2015-01-01T00:00:00.000Z');
+        expect(result.lastWorkout.getTime()).toBe(Date.UTC(2015, 0, 1) + 129_999 * 2 * 3_600_000);
+    });
+
     it('rejects an export without sets', () => {
         expect(() => convertFitbodExport(`${FITBOD_HEADER}\n`)).toThrow(FitbodParseError);
         expect(() => convertFitbodExport(`${FITBOD_HEADER}\n`)).toThrow(/contains no sets/);

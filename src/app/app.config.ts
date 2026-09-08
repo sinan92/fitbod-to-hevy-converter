@@ -1,8 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { VisibleErrorHandler } from './visible-error-handler';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    
-  ]
+    providers: [
+        // Route window "error" and "unhandledrejection" events through the ErrorHandler below.
+        provideBrowserGlobalErrorListeners(),
+        { provide: ErrorHandler, useExisting: VisibleErrorHandler },
+    ],
 };

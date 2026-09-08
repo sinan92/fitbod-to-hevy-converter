@@ -1,6 +1,8 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, HostListener, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { ConversionResult, convertFitbodExport, OUTPUT_FILE_NAME } from './converter/convert';
+import { formatLocalDate } from './converter/hevy-csv';
+import { VisibleErrorHandler } from './visible-error-handler';
 
 /** What the page is doing. Everything shown is derived from this plus the file name and the result. */
 export type Phase = 'idle' | 'reading' | 'done' | 'error';
@@ -16,7 +18,8 @@ export interface Step {
 /** How many unmapped exercise names the receipt shows before "+ N more". */
 export const UNMAPPED_PREVIEW = 6;
 
-const formatMonth = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+/** "2023-10": the month of a date, in local time like the CSV. */
+const formatMonth = (d: Date) => formatLocalDate(d).slice(0, 7);
 
 @Component({
     selector: 'app-root',
@@ -26,6 +29,8 @@ const formatMonth = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).
 })
 export class App {
     readonly outputFileName = OUTPUT_FILE_NAME;
+    /** Errors that escaped every handler. Shown in a banner so that nothing can fail silently. */
+    readonly unexpected = inject(VisibleErrorHandler);
 
     readonly phase = signal<Phase>('idle');
     readonly fileName = signal('');
@@ -97,6 +102,8 @@ export class App {
     async handleFiles(files: ArrayLike<File> | null): Promise<void> {
         this.reset();
         if (!files || files.length === 0) {
+            // Dragged text, a link or an image from another page: the drop carries no file.
+            this.fail('That was not a file. Drop your Fitbod WorkoutExport.csv.');
             return;
         }
         if (files.length > 1) {
@@ -128,9 +135,9 @@ export class App {
 
     /** Starts (or restarts) the download of the last conversion. */
     download(): void {
-        const result = this.result();
-        if (result) {
-            this.saveFile(new File([result.csv], OUTPUT_FILE_NAME, { type: 'text/csv' }));
+        const file = this.outputFile();
+        if (file) {
+            this.saveFile(file);
         }
     }
 
@@ -139,11 +146,10 @@ export class App {
      * where Hevy can pick it up; a blob download may open the CSV as text instead. Cancelling is not an error.
      */
     async shareFile(): Promise<void> {
-        const result = this.result();
-        if (!result) {
+        const file = this.outputFile();
+        if (!file) {
             return;
         }
-        const file = new File([result.csv], OUTPUT_FILE_NAME, { type: 'text/csv' });
         try {
             await navigator.share({ files: [file], title: 'Fitbod to Hevy' });
         } catch (e) {
@@ -153,15 +159,29 @@ export class App {
         }
     }
 
+    /** The only way out after an unexpected error: start over with a clean page. */
+    reload(): void {
+        location.reload();
+    }
+
     /** Separate so tests can stub the browser download. */
     saveFile(file: File): void {
         const url = URL.createObjectURL(file);
         const anchor = document.createElement('a');
         anchor.href = url;
         anchor.download = file.name;
+        // Attached to the document while clicked: some web views ignore a click on a detached anchor.
+        document.body.append(anchor);
         anchor.click();
+        anchor.remove();
         // Revoke later: some browsers start the download asynchronously.
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    }
+
+    /** The converted CSV as a file, or null before a conversion. */
+    private outputFile(): File | null {
+        const result = this.result();
+        return result ? new File([result.csv], OUTPUT_FILE_NAME, { type: 'text/csv' }) : null;
     }
 
     private fail(message: string): void {
@@ -170,10 +190,19 @@ export class App {
     }
 }
 
-/** Web Share with files exists on iOS 15+, Android Chrome and Safari; not on desktop browsers or the test DOM. */
+/**
+ * Web Share with files exists on iOS 15+, Android, but also on Chrome for Windows/ChromeOS and Safari
+ * for macOS. Only phones and tablets need it (there a blob download may open the CSV as text), so it is
+ * offered on touch-first devices only; desktop browsers keep the plain download.
+ */
 function detectFileSharing(): boolean {
     try {
-        return typeof navigator.canShare === 'function' && navigator.canShare({ files: [new File([''], 'probe.csv', { type: 'text/csv' })] });
+        return (
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(pointer: coarse)').matches &&
+            typeof navigator.canShare === 'function' &&
+            navigator.canShare({ files: [new File([''], 'probe.csv', { type: 'text/csv' })] })
+        );
     } catch {
         return false;
     }
