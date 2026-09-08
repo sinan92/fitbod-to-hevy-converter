@@ -1,5 +1,6 @@
 import { EXERCISE_MAPPINGS } from './exercise-mappings';
-import { FitbodParseError, parseFitbodCsv } from './fitbod-csv';
+import { ColumnMapping } from './column-mapping';
+import { FitbodParseError, readFitbodCsv } from './fitbod-csv';
 import { serializeHevyCsv, toHevyRows } from './hevy-csv';
 
 export const OUTPUT_FILE_NAME = 'FitBodToHevyConvertedFile.csv';
@@ -16,11 +17,17 @@ export interface ConversionResult {
     firstWorkout: Date;
     /** Latest workout start, for display. */
     lastWorkout: Date;
+    /** Which input format was recognised (e.g. "Fitbod app export"), or "Manual column mapping". */
+    format: string;
 }
 
-/** Converts the text of a Fitbod WorkoutExport.csv. Throws {@link FitbodParseError} on invalid input. */
-export function convertFitbodExport(text: string): ConversionResult {
-    const sets = parseFitbodCsv(text);
+/**
+ * Converts the text of a Fitbod export. Known formats are recognised from the header; pass a manual
+ * `mapping` for any other CSV. Throws {@link FitbodParseError} on invalid input; the subclass
+ * {@link UnknownFormatError} carries the header and a suggested mapping when no format matches.
+ */
+export function convertFitbodExport(text: string, mapping?: ColumnMapping): ConversionResult {
+    const { sets, format } = readFitbodCsv(text, mapping);
     if (sets.length === 0) {
         throw new FitbodParseError('The export contains no sets.');
     }
@@ -42,5 +49,6 @@ export function convertFitbodExport(text: string): ConversionResult {
         unmappedExercises: [...unmapped].sort((a, b) => a.localeCompare(b)),
         firstWorkout: new Date(first),
         lastWorkout: new Date(last),
+        format,
     };
 }
