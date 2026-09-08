@@ -133,7 +133,7 @@ export function convertFitbodExport(text: string): ConversionResult; // throws F
 | 4 Mappings + facade | done | `src/app/converter/convert.spec.ts`; 106 mappings ported verbatim |
 | 5 App component | done | `src/app/app.spec.ts` (5 specs, TestBed + zoneless) |
 | 6 Real-file validation | done | scratchpad `real-export.spec.ts` (not committed): 14 367 sets, 1 632 W, 222 unmapped, 429 rows with `m` distance, no NaN/Invalid, every row 14 columns |
-| 7 Deploy + docs | done (not exercised) | `deploy.yml` → node from `.nvmrc`, Vitest, FTPS v4.4.0, `browser/` output dir; README rewritten |
+| 7 Deploy + docs | done (not exercised) | `deploy.yml` → node from `.nvmrc`, Vitest, SFTP via lftp (taken from origin/main 5b9f6ac; this Strato package resets FTP/FTPS), `browser/` output dir; README rewritten |
 | 8 Verification gate | `ng test` 58/58, `ng build` clean; browser check: see session |
 
 **Not verified:** an actual Hevy import of the generated file (only the user can do that, once). The `m`
