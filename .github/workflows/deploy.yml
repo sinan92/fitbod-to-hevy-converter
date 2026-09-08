@@ -69,10 +69,11 @@ jobs:
         env:
           SFTP_SERVER: ${{ secrets.STRATO_SFTP_SERVER }}
           SFTP_USER: ${{ secrets.STRATO_FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.STRATO_FTP_PASSWORD }}
+          LFTP_PASSWORD: ${{ secrets.STRATO_FTP_PASSWORD }}
           REMOTE_PATH: ${{ secrets.STRATO_SERVER_PATH }}
         run: |
-          lftp -u "$SFTP_USER,$SFTP_PASS" "sftp://$SFTP_SERVER:22" -e "
+          # --env-password reads LFTP_PASSWORD, so any character in the password is safe
+          lftp --env-password -u "$SFTP_USER" "sftp://$SFTP_SERVER:22" -e "
             set sftp:auto-confirm yes;
             set net:max-retries 3;
             set net:timeout 30;
