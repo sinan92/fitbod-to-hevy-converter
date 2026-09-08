@@ -37,6 +37,12 @@ describe('convertFitbodExport', () => {
         expect(result.csv).not.toMatch(/NaN|Invalid|undefined/);
     });
 
+    it('reports the first and last workout date', () => {
+        const result = convertFitbodExport(REAL_LOOKING_EXPORT);
+        expect(result.firstWorkout.toISOString()).toBe('2023-10-24T07:10:00.000Z');
+        expect(result.lastWorkout.toISOString()).toBe('2023-10-25T17:00:00.000Z');
+    });
+
     it('rejects an export without sets', () => {
         expect(() => convertFitbodExport(`${FITBOD_HEADER}\n`)).toThrow(FitbodParseError);
         expect(() => convertFitbodExport(`${FITBOD_HEADER}\n`)).toThrow(/contains no sets/);

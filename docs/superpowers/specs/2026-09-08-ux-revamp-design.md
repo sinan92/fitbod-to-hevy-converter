@@ -3,7 +3,7 @@
 **Date:** 2026-09-08
 **Status:** approved in brainstorming (direction B + C, one page, English copy)
 **Scope:** `src/app/app.ts`, `src/app/app.html`, `src/app/app.scss`, `src/styles.scss`, `src/index.html`.
-The converter (`src/app/converter/*`) does not change.
+The converter (`src/app/converter/*`) only gains two additive result fields (see Interaction details).
 
 ## Goal
 

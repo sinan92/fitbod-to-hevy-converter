@@ -12,6 +12,10 @@ export interface ConversionResult {
     warmupCount: number;
     /** Fitbod exercise names with no Hevy mapping, sorted and unique. They are passed through as-is. */
     unmappedExercises: string[];
+    /** Earliest workout start, for display. */
+    firstWorkout: Date;
+    /** Latest workout start, for display. */
+    lastWorkout: Date;
 }
 
 /** Converts the text of a Fitbod WorkoutExport.csv. Throws {@link FitbodParseError} on invalid input. */
@@ -21,6 +25,7 @@ export function convertFitbodExport(text: string): ConversionResult {
         throw new FitbodParseError('The export contains no sets.');
     }
     const rows = toHevyRows(sets, EXERCISE_MAPPINGS);
+    const times = sets.map((s) => s.date.getTime());
     const unmapped = new Set(sets.filter((s) => !EXERCISE_MAPPINGS.has(s.exercise)).map((s) => s.exercise));
     return {
         csv: serializeHevyCsv(rows),
@@ -28,5 +33,7 @@ export function convertFitbodExport(text: string): ConversionResult {
         workoutCount: new Set(sets.map((s) => s.timestamp)).size,
         warmupCount: sets.filter((s) => s.isWarmup).length,
         unmappedExercises: [...unmapped].sort((a, b) => a.localeCompare(b)),
+        firstWorkout: new Date(Math.min(...times)),
+        lastWorkout: new Date(Math.max(...times)),
     };
 }
