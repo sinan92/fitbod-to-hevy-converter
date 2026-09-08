@@ -12,6 +12,7 @@ jobs:
       # Path under which the app is hosted, e.g. "/fitbod-to-hevy/". Set as a repository or
       # environment variable named BASE_HREF; defaults to the web root.
       BASE_HREF: ${{ vars.BASE_HREF || '/' }}
+      OUTPUT_DIR: dist/fitbod-to-hevy-converter/browser
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,26 +22,26 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run unit tests
-        run: npx ng test --watch=false --browsers=ChromeHeadless --progress=false
+        run: npx ng test --watch=false
 
       - name: Build Angular application
-        run: npx ng build --configuration production --base-href "$BASE_HREF" --progress=false
+        run: npx ng build --configuration production --base-href "$BASE_HREF"
 
-      - name: Add .htaccess for routing
+      - name: Add .htaccess for caching and compression
         run: |
-          cat > dist/fitbod-to-hevy-converter/.htaccess << EOL
+          cat > "$OUTPUT_DIR/.htaccess" << EOL
           <IfModule mod_rewrite.c>
             RewriteEngine On
             RewriteBase ${BASE_HREF}
 
-            # Serve index.html for any path that is not an existing file or directory (Angular routing)
+            # Serve index.html for any path that is not an existing file or directory
             RewriteCond %{REQUEST_FILENAME} !-f
             RewriteCond %{REQUEST_FILENAME} !-d
             RewriteRule ^(.*)$ index.html [L]
@@ -60,22 +61,15 @@ jobs:
           </IfModule>
           EOL
 
-      - name: Install lftp
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
-
-      # This Strato package only offers SFTP + SSH (plain FTP resets the connection),
-      # so upload with lftp over SFTP using password authentication.
-      - name: Deploy to Strato via SFTP
-        env:
-          SFTP_SERVER: ${{ secrets.STRATO_SFTP_SERVER }}
-          SFTP_USER: ${{ secrets.STRATO_FTP_USERNAME }}
-          LFTP_PASSWORD: ${{ secrets.STRATO_FTP_PASSWORD }}
-          REMOTE_PATH: ${{ secrets.STRATO_SERVER_PATH }}
-        run: |
-          # --env-password reads LFTP_PASSWORD, so any character in the password is safe
-          lftp --env-password -u "$SFTP_USER" "sftp://$SFTP_SERVER:22" -e "
-            set sftp:auto-confirm yes;
-            set net:max-retries 3;
-            set net:timeout 30;
-            mirror --reverse --verbose --parallel=4 ./dist/fitbod-to-hevy-converter/ \"$REMOTE_PATH\";
-            bye"
+      - name: Deploy to Strato via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ftp.strato.com
+          port: 21
+          # Explicit TLS: plain FTP would send the credentials and the site in cleartext.
+          protocol: ftps
+          username: ${{ secrets.STRATO_FTP_USERNAME }}
+          password: ${{ secrets.STRATO_FTP_PASSWORD }}
+          local-dir: ./dist/fitbod-to-hevy-converter/browser/
+          server-dir: ${{ secrets.STRATO_SERVER_PATH }}
+          state-name: ".ftp-deploy-sync-state.json"

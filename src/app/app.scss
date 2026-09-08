@@ -1,0 +1,76 @@
+.page {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.lead {
+    color: #444;
+}
+
+.dropzone {
+    border: 2px dashed #888;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &.dragging {
+        border-color: #1565c0;
+        background-color: #e3f2fd;
+    }
+}
+
+.button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid #1565c0;
+    border-radius: 0.25rem;
+    background: #1565c0;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: #0d47a1;
+    }
+}
+
+.status {
+    color: #2e7d32;
+}
+
+.error {
+    color: #c62828;
+    font-weight: bold;
+}
+
+.result {
+    margin-top: 1.5rem;
+
+    dl {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.25rem 1rem;
+    }
+
+    dt {
+        font-weight: 600;
+    }
+
+    dd {
+        margin: 0;
+    }
+
+    ul {
+        columns: 2;
+        font-size: 0.9rem;
+    }
+}
+
+footer {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: #666;
+}

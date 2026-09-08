@@ -1,0 +1,62 @@
+<main class="page">
+    <h1>Fitbod → Hevy converter</h1>
+    <p class="lead">
+        Drop your Fitbod <strong>WorkoutExport.csv</strong> below. You get a CSV in the Strong format that Hevy imports
+        (Profile → Settings → Import data). Everything runs in your browser; nothing is uploaded.
+    </p>
+
+    <div
+        class="dropzone"
+        [class.dragging]="dragging()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+    >
+        <p>Drop your WorkoutExport.csv here, or</p>
+        <label class="button">
+            Browse files
+            <input type="file" accept=".csv,text/csv" (change)="onFileInput($event)" hidden />
+        </label>
+    </div>
+
+    @if (status()) {
+        <p class="status" role="status">{{ status() }}</p>
+    }
+    @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
+    }
+
+    @if (result(); as r) {
+        <section class="result">
+            <button type="button" class="button" (click)="download()">Download again</button>
+            <dl>
+                <dt>Sets</dt>
+                <dd>{{ r.setCount }}</dd>
+                <dt>Workouts</dt>
+                <dd>{{ r.workoutCount }}</dd>
+                <dt>Warm-up sets</dt>
+                <dd>{{ r.warmupCount }}</dd>
+                <dt>Exercises without a Hevy mapping</dt>
+                <dd>{{ unmappedCount() }}</dd>
+            </dl>
+            @if (unmappedCount() > 0) {
+                <details>
+                    <summary>Show the {{ unmappedCount() }} unmapped exercise names</summary>
+                    <p>These are kept as-is. Hevy creates a custom exercise for each on import.</p>
+                    <ul>
+                        @for (name of r.unmappedExercises; track name) {
+                            <li>{{ name }}</li>
+                        }
+                    </ul>
+                </details>
+            }
+        </section>
+    }
+
+    <footer>
+        <p>
+            Fitbod does not export workout end times, so every workout is written with an estimated duration of 60 minutes.
+            Weights are written as logged (per dumbbell); warm-up sets are marked as warm-ups.
+        </p>
+    </footer>
+</main>
