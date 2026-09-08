@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "fitbod-to-hevy",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ng", "serve", "--port", "4201"],
+      "port": 4201,
+      "autoPort": false
+    }
+  ]
+}

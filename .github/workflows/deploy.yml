@@ -1,0 +1,71 @@
+name: Deploy to Strato Webhost
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: STRATO
+    env:
+      # Path under which the app is hosted, e.g. "/fitbod-to-hevy/". Set as a repository or
+      # environment variable named BASE_HREF; defaults to the web root.
+      BASE_HREF: ${{ vars.BASE_HREF || '/' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npx ng test --watch=false --browsers=ChromeHeadless --progress=false
+
+      - name: Build Angular application
+        run: npx ng build --configuration production --base-href "$BASE_HREF" --progress=false
+
+      - name: Add .htaccess for routing
+        run: |
+          cat > dist/fitbod-to-hevy-converter/.htaccess << EOL
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase ${BASE_HREF}
+
+            # Serve index.html for any path that is not an existing file or directory (Angular routing)
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule ^(.*)$ index.html [L]
+          </IfModule>
+
+          <IfModule mod_expires.c>
+            ExpiresActive On
+            # Hashed bundles can be cached for a year; index.html must not be cached
+            ExpiresByType text/css "access plus 1 year"
+            ExpiresByType application/javascript "access plus 1 year"
+            ExpiresByType image/x-icon "access plus 1 year"
+            ExpiresByType text/html "access plus 0 seconds"
+          </IfModule>
+
+          <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/html text/css application/javascript
+          </IfModule>
+          EOL
+
+      - name: Deploy to Strato via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.strato.com
+          username: ${{ secrets.STRATO_FTP_USERNAME }}
+          password: ${{ secrets.STRATO_FTP_PASSWORD }}
+          local-dir: ./dist/fitbod-to-hevy-converter/
+          server-dir: ${{ secrets.STRATO_SERVER_PATH }}
+          state-name: ".ftp-deploy-sync-state.json"
