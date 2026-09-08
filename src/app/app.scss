@@ -210,18 +210,6 @@
     }
 }
 
-.trust {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.4rem 1rem;
-    margin: 0.8rem 0 0;
-    padding: 0;
-    list-style: none;
-    font-size: 0.72rem;
-    color: var(--muted);
-}
-
 // The result reads like a receipt: header, perforation, the numbers, the fine print, the actions.
 .receipt {
     border: 1px solid var(--border);
@@ -480,7 +468,6 @@
     }
 
     .rail__step,
-    .trust,
     .chip,
     .receipt__unmapped,
     .receipt__number dt,

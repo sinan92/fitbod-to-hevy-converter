@@ -71,11 +71,21 @@ describe('App', () => {
     }
 
     it('opens with the drop zone and step 2 active', () => {
-        expect(text('.headline')).toBe('Bring your whole history with you.');
+        expect(text('.headline')).toBe('Fitbod to Hevy converter');
+        expect(text('.lead')).toBe(
+            'Turns the WorkoutExport.csv from Fitbod into the Strong-format CSV that Hevy imports. Runs in your browser; nothing is uploaded.',
+        );
         expect(element.querySelector('.drop')).not.toBeNull();
         expect(element.querySelector('input[type=file]')).not.toBeNull();
         expect(railStates()).toEqual(['pending', 'active', 'pending']);
         expect(element.querySelector('.next')).toBeNull();
+        expect(element.querySelector('.trust')).toBeNull();
+    });
+
+    it('keeps the footer to the conversion notes', () => {
+        expect(element.querySelectorAll('.footnote p')).toHaveLength(1);
+        expect(text('.footnote')).toContain('Weights are written as logged');
+        expect(element.querySelector('.footnote a')).toBeNull();
     });
 
     it('converts a valid export into a receipt and starts the download once', async () => {
