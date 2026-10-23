@@ -16,12 +16,12 @@ const WARMUP_EXPORT =
 /** Eight unmapped exercises across two months, so the receipt shows "+ 2 more" and a date range. */
 const RICH_EXPORT =
     `${FITBOD_HEADER}\n` +
-    ['Ab Rollout', 'Burpee', 'Chin Up', 'Front Squat', 'Hack Squat', 'Pull Up', 'Push Up', 'Sit Up']
+    ['Box Jump', 'Burpee', 'Chin Up', 'Front Squat', 'Hack Squat', 'Pull Up', 'Push Up', 'Sit Up']
         .map((name, i) => `2025-0${i < 4 ? 1 : 3}-19 09:37:32 +0000,${name}, 5,0.0,0.0,0.0,0.0,0.0,false,, 1.0`)
         .join('\n') +
     '\n';
 
-const ONE_UNMAPPED_EXPORT = `${FITBOD_HEADER}\n2025-01-19 09:37:32 +0000,Ab Rollout, 5,0.0,0.0,0.0,0.0,0.0,false,, 1.0\n`;
+const ONE_UNMAPPED_EXPORT = `${FITBOD_HEADER}\n2025-01-19 09:37:32 +0000,Box Jump, 5,0.0,0.0,0.0,0.0,0.0,false,, 1.0\n`;
 
 /** Pretends the browser has (or lacks) a share sheet for files and a touch screen. */
 function fakeBrowser(options: { canShare?: boolean; share?: (data: ShareData) => Promise<void>; coarsePointer?: boolean }): void {
